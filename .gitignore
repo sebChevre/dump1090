@@ -1,12 +1,16 @@
 # Created by .ignore support plugin (hsz.mobi)
-/target/
+#target folder
+*/target
+
+#idea folder
 /.idea/
-.iml
-.idea/
-dump1090-ws/dump1090-ws.iml
 
-dump1090-ws/target/
-dump1090.iml
-target/
-logs/
+#all iml and idea
+*.iml
+/.idea
 
+#logs
+logs
+
+#src root project
+src/
