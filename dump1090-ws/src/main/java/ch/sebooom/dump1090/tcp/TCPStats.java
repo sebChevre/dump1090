@@ -10,19 +10,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Created by seb on 26.11.16.
  */
-public class TCPStats {
+class TCPStats {
 
     private HashMap<MessageType,AtomicInteger> messagesByType = new HashMap<>();
 
 
-    public static TCPStats from(List<Message> messages){
-        return new TCPStats(messages);
-    }
-
-    public int getCount () {
-        return messagesByType.values().stream()
-                .mapToInt(i -> i.intValue()).sum();
-    }
     private TCPStats(List<Message> messages){
 
         messages.forEach(message->{
@@ -34,6 +26,15 @@ public class TCPStats {
 
     }
 
+    static TCPStats from(List<Message> messages) {
+        return new TCPStats(messages);
+    }
+
+    int getCount() {
+        return messagesByType.values().stream()
+                .mapToInt(AtomicInteger::intValue).sum();
+    }
+
     @Override
     public String toString() {
         return "TCPStats{" +
@@ -41,13 +42,10 @@ public class TCPStats {
                 '}';
     }
 
-    public String toJson(){
+    String toJson() {
         StringBuilder ret = new StringBuilder("{");
 
-        messagesByType.keySet().forEach(messageType->{
-
-            ret.append(messageType.toString()).append(":").append(messagesByType.get(messageType).get()).append(",");
-        });
+        messagesByType.keySet().forEach(messageType -> ret.append(messageType.toString()).append(":").append(messagesByType.get(messageType).get()).append(","));
 
         ret.append("}");
         return ret.toString();

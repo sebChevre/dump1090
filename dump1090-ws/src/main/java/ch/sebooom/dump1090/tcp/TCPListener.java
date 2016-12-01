@@ -13,11 +13,10 @@ import java.util.logging.Logger;
  */
 public class TCPListener {
 
-    final static Logger logger = Logger.getLogger(TCPListener.class.getName());
+    private final static Logger logger = Logger.getLogger(TCPListener.class.getName());
     private int port;
     private String host;
     private RxBus bus;
-    private Boolean isRunning = Boolean.FALSE;
 
     public TCPListener(int port, String host ,RxBus bus){
         this.bus = bus;
@@ -28,7 +27,7 @@ public class TCPListener {
 
     public void start(){
 
-        isRunning = Boolean.TRUE;
+        Boolean isRunning = Boolean.TRUE;
 
 
             try {

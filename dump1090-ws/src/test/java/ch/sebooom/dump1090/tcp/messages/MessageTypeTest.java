@@ -1,12 +1,11 @@
 package ch.sebooom.dump1090.tcp.messages;
 
-import junit.framework.TestCase;
 import org.junit.Test;
 
-/**
- * Created by seb on 22.11.16.
- */
-public class MessageTypeTest extends TestCase {
+import static org.junit.Assert.assertTrue;
+
+
+public class MessageTypeTest {
 
     @Test
     public void testSimpleCase(){
@@ -29,20 +28,13 @@ public class MessageTypeTest extends TestCase {
 
 
         long msgCount = SBS1MessagesSamples.messages.stream()
-                .map(msg -> {
-                    return new Message().fromTCPString(msg);
-                }).count();
+                .map(Message::fromTCPString).count();
 
         assertTrue(msgCount == count);
 
         SBS1MessagesSamples.messages.stream()
-                .map(msg -> {
-                    return new Message().fromTCPString(msg);
-                })
-                .forEach(message -> {
-                    System.out.println(message.toJson());
-
-                });
+                .map(msg -> Message.fromTCPString(msg))
+                .forEach(message -> System.out.println(message.toJson()));
     }
 
 }

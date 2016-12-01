@@ -40,9 +40,7 @@ public enum MessageType {
 
         Optional<MessageType> messageType = Arrays.asList(MessageType.values())
             .stream()
-            .filter(msg -> {
-                return msg.toString().equals(fullType.toString());
-            })
+                .filter(msg -> msg.toString().equals(fullType.toString()))
             .findFirst();
 
         if(messageType.isPresent()){

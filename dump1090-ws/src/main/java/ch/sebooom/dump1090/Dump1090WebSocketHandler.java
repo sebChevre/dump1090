@@ -4,7 +4,6 @@ import ch.sebooom.dump1090.utils.Utils;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketClose;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketConnect;
-import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 
 import java.io.IOException;
@@ -17,9 +16,9 @@ import java.util.logging.Logger;
  *
  */
 @WebSocket
-public class Dump1090WebSocketHandler {
+class Dump1090WebSocketHandler {
 
-    final static Logger logger = Utils.getFileLogger("ws_handler",Dump1090WebSocketHandler.class.getName(),true);
+    private final static Logger logger = Utils.getFileLogger(Dump1090WebSocketHandler.class.getName());
     private static final Queue<Session> sessions = new ConcurrentLinkedQueue<>();
     private final RxBus bus;
 
@@ -40,12 +39,8 @@ public class Dump1090WebSocketHandler {
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-                },error->{
-                    logger.severe(error.getMessage());
-                }
-                ,()->{
-                    logger.info("Stream terminated. This is a problem in this context...");
-                });
+                        }, error -> logger.severe(error.getMessage())
+                        , () -> logger.info("Stream terminated. This is a problem in this context..."));
     }
 
     @OnWebSocketClose
@@ -53,7 +48,5 @@ public class Dump1090WebSocketHandler {
         sessions.remove(session);
     }
 
-    @OnWebSocketMessage
-    public void message(Session session, String message) throws IOException {
-    }
+
 }

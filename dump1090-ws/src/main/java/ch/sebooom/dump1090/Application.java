@@ -15,9 +15,9 @@ import java.util.logging.Logger;
  *             -sp (port serveur ws, défaut:9999)
  * Exemple: -sp 9898 -rh 192.168.1.109 -rp 30003
  */
-public class Application {
+class Application {
 
-    final static Logger logger = Logger.getLogger(Application.class.getName());
+    private final static Logger logger = Logger.getLogger(Application.class.getName());
     private final static int DEFAULT_REMOTE_PORT = 1234;
     private final static String DEFAULT_REMOTE_HOST = "localhost";
     private final static int DEFAULT_SERVER_PORT = 9999;
@@ -49,32 +49,24 @@ public class Application {
         logger.info("Starting tcp stats...");
 
 
-        Executors.newSingleThreadExecutor().execute(() -> {
-            TCPStatsGenerator.newInstance()
-                    .withBus(bus).start();
-
-        });
+        Executors.newSingleThreadExecutor().execute(() -> TCPStatsGenerator.newInstance()
+                .withBus(bus).start());
 
     }
 
     private static void startServer() {
         logger.info("Starting server...");
 
-        Executors.newSingleThreadExecutor().execute(() -> {
-            Server.newInstance()
-                    .withPort(serverPort)
-                    .withBus(bus).start();
-
-        });
+        Executors.newSingleThreadExecutor().execute(() -> Server.newInstance()
+                .withPort(serverPort)
+                .withBus(bus).start());
 
     }
 
     private static void startTCPListenning() {
         logger.info("Starting tcp listenning...");
 
-        Executors.newSingleThreadExecutor().execute(() -> {
-            new TCPListener(remotePort,remoteHost,bus).start();
-        });
+        Executors.newSingleThreadExecutor().execute(() -> new TCPListener(remotePort, remoteHost, bus).start());
 
     }
 

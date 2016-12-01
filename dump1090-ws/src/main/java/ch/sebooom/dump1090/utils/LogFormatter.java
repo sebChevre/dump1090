@@ -5,7 +5,7 @@ import java.util.Date;
 import java.util.logging.Formatter;
 import java.util.logging.LogRecord;
 
-public class LogFormatter extends Formatter{
+class LogFormatter extends Formatter {
 
 	private static final String PATTERN = "dd-MM-yyyy HH:mm:ss.SSSXXX";
 	

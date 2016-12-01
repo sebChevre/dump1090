@@ -11,15 +11,16 @@ import java.util.logging.Logger;
 public class TCPStatsGenerator {
 
 
+    final static Logger logger = Logger.getLogger(TCPStatsGenerator.class.getName());
     private int port;
     private RxBus bus;
 
-    final static Logger logger = Logger.getLogger(TCPStatsGenerator.class.getName());
+    private TCPStatsGenerator() {
+    }
+
     public static TCPStatsGenerator newInstance(){
         return new TCPStatsGenerator();
     }
-
-    private TCPStatsGenerator(){}
 
     public void start(){
 
@@ -27,9 +28,7 @@ public class TCPStatsGenerator {
 
         bus.toObserverable()
                 .buffer(1, TimeUnit.SECONDS)
-                .map(messages -> {
-                    return TCPStats.from(messages);
-                })
+                .map(messages -> TCPStats.from(messages))
                 .subscribe(next -> {
 
                     int count = next.getCount();
@@ -37,12 +36,8 @@ public class TCPStatsGenerator {
                     logger.fine(count + " messages received in last seconds");
                     logger.fine("Stats:" + next.toJson());
 
-                },error -> {
-                    logger.severe("Error during stream processing for tcp stats: "
-                            + error.getMessage());
-                },()->{
-                    logger.severe("Stream complete for tcp stats, that's a problem");
-                });
+                }, error -> logger.severe("Error during stream processing for tcp stats: "
+                        + error.getMessage()), () -> logger.severe("Stream complete for tcp stats, that's a problem"));
     }
 
 

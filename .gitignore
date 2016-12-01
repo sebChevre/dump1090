@@ -7,10 +7,10 @@
 
 #all iml and idea
 *.iml
-/.idea
+
 
 #logs
 logs
 
 #src root project
-src/
+/src

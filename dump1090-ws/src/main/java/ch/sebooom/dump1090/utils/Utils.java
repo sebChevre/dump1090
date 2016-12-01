@@ -24,13 +24,13 @@ public class Utils {
     }
 
 
-    public static Logger getFileLogger(String fileNamePrefix, String className, boolean enableConsoleLog){
+    public static Logger getFileLogger(String className) {
 
         Logger logger = Logger.getLogger(className);
 
-        addFileHandler(logger,fileNamePrefix);
+        addFileHandler(logger, "ws_handler");
 
-        if(enableConsoleLog){
+        if (true) {
             addConsoleHandler(logger);
         }
 
@@ -61,6 +61,7 @@ public class Utils {
             e.printStackTrace();
         }
 
+        assert ch != null;
         ch.setFormatter(new LogFormatter());
         logger.addHandler(ch);
     }
@@ -85,6 +86,7 @@ public class Utils {
             e.printStackTrace();
         }
 
+        assert fh != null;
         fh.setFormatter(new LogFormatter());
 
         logger.addHandler(fh);
