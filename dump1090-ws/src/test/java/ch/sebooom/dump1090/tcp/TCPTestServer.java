@@ -19,11 +19,12 @@ public class TCPTestServer {
         try {
             ServerSocket srvr = new ServerSocket(1234);
             Socket skt = srvr.accept();
+
+
             PrintWriter out = new PrintWriter(skt.getOutputStream(), true);
 
 
             while(running){
-
 
                 out.print(SBS1MessagesSamples.getRandomMsg());
                 System.out.println("Message sent");

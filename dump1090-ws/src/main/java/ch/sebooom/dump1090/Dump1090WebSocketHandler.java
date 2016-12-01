@@ -1,5 +1,6 @@
 package ch.sebooom.dump1090;
 
+import ch.sebooom.dump1090.utils.Utils;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketClose;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketConnect;
@@ -9,18 +10,20 @@ import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import java.io.IOException;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.logging.Logger;
 
 /**
- * Created by seb on 22.11.16.
+ * Handler pour le server Spark permettant le traitement des websocket
+ *
  */
 @WebSocket
-public class WSTCPDump1090WebSocketHandler {
+public class Dump1090WebSocketHandler {
 
-    // Store sessions if you want to, for example, broadcast a message to all users
+    final static Logger logger = Utils.getFileLogger("ws_handler",Dump1090WebSocketHandler.class.getName(),true);
     private static final Queue<Session> sessions = new ConcurrentLinkedQueue<>();
     private final RxBus bus;
 
-    public WSTCPDump1090WebSocketHandler(RxBus bus) {
+    public Dump1090WebSocketHandler(RxBus bus) {
         this.bus = bus;
     }
 
@@ -32,14 +35,17 @@ public class WSTCPDump1090WebSocketHandler {
         bus.toObserverable()
                 .subscribe(next -> {
                     try {
-                        System.out.println("ws publish");
-                        session.getRemote().sendString(next);
+                        logger.info("From bus: " + next);
+                        session.getRemote().sendString(next.toJson());
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
+                },error->{
+                    logger.severe(error.getMessage());
+                }
+                ,()->{
+                    logger.info("Stream terminated. This is a problem in this context...");
                 });
-
-
     }
 
     @OnWebSocketClose

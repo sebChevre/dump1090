@@ -4,10 +4,9 @@
 .iml
 .idea/
 dump1090-ws/dump1090-ws.iml
-dump1090-ws/src/main/resources/
+
 dump1090-ws/target/
 dump1090.iml
-src/main/java/ch/sebooom/adsb/domain/
-src/main/resources/
-src/test/
 target/
+logs/
+

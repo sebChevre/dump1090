@@ -13,7 +13,7 @@ public class Message {
     private MessageType type;
     private static Gson gson = new GsonBuilder().create();
 
-    public Message fromTCPString(String tcpString){
+    public static Message fromTCPString(String tcpString){
         Validate.notEmpty(tcpString); //null et pas vide
         return valideAndDecode(tcpString);
     }
@@ -42,9 +42,10 @@ public class Message {
     }
 
     public String toJson(){
-        return messageFields.toString();
+        return messageFields.toJson();
+    }
 
-
-
+    public MessageType type() {
+        return type;
     }
 }

@@ -9,7 +9,7 @@ public class Fields {
     public Field messageType = new Field("Message type",0);
     public Field transmissionType = new Field("Transmission type",1);
     public Field sessionID	 = new Field("Session ID",2);
-    public Field aircraftID= new Field("Aircraft ID",3);
+    public Field aircraftID = new Field("Aircraft ID",3);
     public Field hexIdent = new Field("HexIdent",4);
     public Field flightID	= new Field("Fligh ID",5);
     public Field dateMessageGen = new Field("Date message generated",6);
@@ -21,45 +21,45 @@ public class Fields {
     public Field groundSpeed = new Field("Groud speed",12);
     public Field track	 = new Field("Track",13);
     public Field latitude = new Field("Latitude",14);
-    public Field longitude= new Field("Longitude",15);
-    public Field verticalRate= new Field("VErtical rate",16);
-    public Field squawk= new Field("Squawk",17);
-    public Field alert= new Field("Alert",18);
-    public Field emergency	= new Field("Emergency",19);
-    public Field sPI= new Field("SPI",20);
-    public Field isOnGround= new Field("is On Ground",21);
+    public Field longitude = new Field("Longitude",15);
+    public Field verticalRate = new Field("Vertical rate",16);
+    public Field squawk = new Field("Squawk",17);
+    public Field alert = new Field("Alert",18);
+    public Field emergency = new Field("Emergency",19);
+    public Field sPI = new Field("SPI",20);
+    public Field isOnGround = new Field("is On Ground",21);
 
-    @Override
-    public String toString() {
+    public String toJson() {
         return "{" +
                 "aircraftID:" + formatFieldToJson(aircraftID) +
-                ", messageType:" + formatFieldToJson(messageType) +
-                ", transmissionType:" + formatFieldToJson(transmissionType) +
-                ", sessionID:" + formatFieldToJson(sessionID) +
-                ", hexIdent:" + formatFieldToJson(hexIdent) +
-                ", flightID:" + formatFieldToJson(flightID) +
-                ", dateMessageGen:" + formatFieldToJson(dateMessageGen) +
-                ", timeMessageGen:" + formatFieldToJson(timeMessageGen) +
-                ", dateMessageLog:" + formatFieldToJson(dateMessageLog) +
-                ", timeMessageLog:" + formatFieldToJson(timeMessageLog) +
-                ", callsign:" + formatFieldToJson(callsign) +
-                ", altitude:" + formatFieldToJson(altitude) +
-                ", groundSpeed:" + formatFieldToJson(groundSpeed) +
-                ", track:" + formatFieldToJson(track) +
-                ", latitude:" + formatFieldToJson(latitude) +
-                ", longitude:" + formatFieldToJson(longitude) +
-                ", verticalRate:" + formatFieldToJson(verticalRate) +
-                ", squawk:" + formatFieldToJson(squawk) +
-                ", alert:" + formatFieldToJson(alert) +
-                ", emergency:" + formatFieldToJson(emergency) +
-                ", sPI:" + formatFieldToJson(sPI) +
-                ", isOnGround:" + formatFieldToJson(isOnGround) +
+                ",messageType:" + formatFieldToJson(messageType) +
+                ",transmissionType:" + formatFieldToJson(transmissionType) +
+                ",sessionID:" + formatFieldToJson(sessionID) +
+                ",hexIdent:" + formatFieldToJson(hexIdent) +
+                ",flightID:" + formatFieldToJson(flightID) +
+                ",dateMessageGen:" + formatFieldToJson(dateMessageGen) +
+                ",timeMessageGen:" + formatFieldToJson(timeMessageGen) +
+                ",dateMessageLog:" + formatFieldToJson(dateMessageLog) +
+                ",timeMessageLog:" + formatFieldToJson(timeMessageLog) +
+                ",callsign:" + formatFieldToJson(callsign) +
+                ",altitude:" + formatFieldToJson(altitude) +
+                ",groundSpeed:" + formatFieldToJson(groundSpeed) +
+                ",track:" + formatFieldToJson(track) +
+                ",latitude:" + formatFieldToJson(latitude) +
+                ",longitude:" + formatFieldToJson(longitude) +
+                ",verticalRate:" + formatFieldToJson(verticalRate) +
+                ",squawk:" + formatFieldToJson(squawk) +
+                ",alert:" + formatFieldToJson(alert) +
+                ",emergency:" + formatFieldToJson(emergency) +
+                ",sPI:" + formatFieldToJson(sPI) +
+                ",isOnGround:" + formatFieldToJson(isOnGround) +
                 '}';
     }
 
+
     public String formatFieldToJson(Field f){
         if(null == f.getValue()){
-            return "''";
+            return null;
         }else{
             return "'" + f.getValue() + "'";
         }
