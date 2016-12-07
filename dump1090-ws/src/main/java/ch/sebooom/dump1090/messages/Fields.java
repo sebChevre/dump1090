@@ -1,4 +1,4 @@
-package ch.sebooom.dump1090.tcp.messages;
+package ch.sebooom.dump1090.messages;
 
 /**
  * Created by seb on .

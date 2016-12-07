@@ -1,15 +1,15 @@
-package ch.sebooom.dump1090.tcp.messages;
+package ch.sebooom.dump1090.tcptestserver.tcp;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
 /**
- * Created by seb on 22.11.16.
+ * SBS1 Messages samples for tests purpose
  */
-public class SBS1MessagesSamples {
+class SBS1MessagesSamples {
 
-    public static List<String> messages = new ArrayList<>();
+    static List<String> messages = new ArrayList<>();
 
     static{
         messages.add("MSG,5,,,3CEFF1,,,,,,,18000,,,,,,,,,,");
@@ -50,7 +50,7 @@ public class SBS1MessagesSamples {
         messages.add("MSG,8,496,194,405F4E,27884,2010/02/19,17:58:13.244,2010/02/19,17:58:13.368,,,,,,,,,,,,0");
     }
 
-    public static String getRandomMsg(){
+    static String getRandomMsg(){
 
         return messages.get(new Random().nextInt(messages.size()-1)) + "\n";
     }

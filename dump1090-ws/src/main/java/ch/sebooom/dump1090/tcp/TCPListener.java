@@ -1,7 +1,7 @@
 package ch.sebooom.dump1090.tcp;
 
 import ch.sebooom.dump1090.RxBus;
-import ch.sebooom.dump1090.tcp.messages.Message;
+import ch.sebooom.dump1090.messages.Message;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -9,7 +9,7 @@ import java.net.Socket;
 import java.util.logging.Logger;
 
 /**
- * Created by seb on 22.11.16.
+ * TCP Listener class
  */
 public class TCPListener {
 
@@ -27,7 +27,6 @@ public class TCPListener {
 
     public void start(){
 
-        Boolean isRunning = Boolean.TRUE;
 
 
             try {
@@ -38,7 +37,7 @@ public class TCPListener {
                 logger.info("TCP Listenning started [" + host +":" + port +"]");
 
 
-                while(isRunning){
+                while(true){
 
                     while (!in.ready()) {}
 
@@ -52,7 +51,7 @@ public class TCPListener {
 
             }
             catch(Exception e) {
-                logger.severe("Error during tcp dump1090 Listenning: " + e.getMessage());
+                logger.severe("Error during ch.sebooom.dump1090.tcptestserver.tcp dump1090 Listenning: " + e.getMessage());
                 logger.severe("System exiting now...");
                 System.exit(1);
             }

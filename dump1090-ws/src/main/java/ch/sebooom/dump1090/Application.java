@@ -1,16 +1,19 @@
 package ch.sebooom.dump1090;
 
+
 import ch.sebooom.dump1090.tcp.TCPListener;
 import ch.sebooom.dump1090.tcp.TCPStatsGenerator;
-import org.apache.commons.cli.*;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.Properties;
 import java.util.concurrent.Executors;
 import java.util.logging.Logger;
 
 /**
  * Point d'entrée de l'application
  *
- * Paramètres: -rp (dump109 tcp port, défaut:30003),
+ * Paramètres: -rp (dump109 ch.sebooom.dump1090.tcptestserver.tcp port, défaut:30003),
  *             -rh (hote dump1090, défaut:localhost)
  *             -sp (port serveur ws, défaut:9999)
  * Exemple: -sp 9898 -rh 192.168.1.109 -rp 30003
@@ -18,20 +21,14 @@ import java.util.logging.Logger;
 class Application {
 
     private final static Logger logger = Logger.getLogger(Application.class.getName());
-    private final static int DEFAULT_REMOTE_PORT = 1234;
-    private final static String DEFAULT_REMOTE_HOST = "localhost";
-    private final static int DEFAULT_SERVER_PORT = 9999;
-    private static int remotePort = DEFAULT_REMOTE_PORT;
-    private static int serverPort = DEFAULT_SERVER_PORT;
-    private static String remoteHost = DEFAULT_REMOTE_HOST;
+
     private static RxBus bus = new RxBus();
-    //private static ExecutorService service = Executors.newSingleThreadExecutor();
+    private static Properties properties = new Properties();
 
 
     public static void main(String[] args) {
 
-        try {
-            parseArgs(args);
+            readProperties();
 
             startServer();
 
@@ -39,14 +36,11 @@ class Application {
 
             startTCPListenning();
 
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
     }
 
     private static void startTCPStats() {
 
-        logger.info("Starting tcp stats...");
+        logger.info("Starting ch.sebooom.dump1090.tcptestserver.tcp stats...");
 
 
         Executors.newSingleThreadExecutor().execute(() -> TCPStatsGenerator.newInstance()
@@ -55,63 +49,63 @@ class Application {
     }
 
     private static void startServer() {
-        logger.info("Starting server...");
+        int port = Integer.parseInt(properties.getProperty("server.port"));
+
+        logger.info("Starting server on port: " + port);
 
         Executors.newSingleThreadExecutor().execute(() -> Server.newInstance()
-                .withPort(serverPort)
+                .withPort(port)
                 .withBus(bus).start());
 
     }
 
     private static void startTCPListenning() {
-        logger.info("Starting tcp listenning...");
+        String tcpHost = properties.getProperty("dump1090.tcp.host");
+        int tcpPort = Integer.parseInt(properties.getProperty("dump1090.tcp.port"));
 
-        Executors.newSingleThreadExecutor().execute(() -> new TCPListener(remotePort, remoteHost, bus).start());
+        logger.info("Starting listenning dump1090tcp server ["
+                + tcpHost + ":" + tcpPort + "]");
+
+        Executors.newSingleThreadExecutor().execute(() ->
+                new TCPListener(tcpPort, tcpHost, bus).start());
 
     }
 
-    private static void parseArgs(String[] args) throws ParseException {
-        logger.info("Parsing arguments...");
 
+    private static void readProperties () {
 
-
-        Options options  = new Options();
-        options.addOption("rp",true,"Port distant tcp du serveur dump1090");
-        options.addOption("rh",true,"Hote distant tcp du serveur dump1090");
-        options.addOption("sp",true,"Port serveur ws");
-
-        CommandLineParser parser = new PosixParser();
-
-        try{
-            CommandLine cmd = parser.parse( options, args);
-
-
-
-            if(cmd.getOptions().length == 0){
-                logger.config("No arguments defined, default values aplied: remoteHost: "
-                        +remoteHost + ":" + remotePort + ", serverPort:" + serverPort);
-
-            }else{
-                remotePort = (cmd.hasOption("rp"))?Integer.parseInt(cmd.getOptionValue("rp")):DEFAULT_REMOTE_PORT;
-                serverPort = (cmd.hasOption("sp"))?Integer.parseInt(cmd.getOptionValue("sp")):DEFAULT_SERVER_PORT;
-                remoteHost = (cmd.hasOption("rh"))?cmd.getOptionValue("rh"):DEFAULT_REMOTE_HOST;
-                logger.config("Arguments parsed, remoteHost: " +getArgumentsConfigAsStr() );
-
-            }
-
-        }catch (UnrecognizedOptionException e){
-            logger.warning(e.getMessage());
-            logger.warning("default value will be applicated: remoteHost: "+
-                    getArgumentsConfigAsStr());
+        try {
+            properties.load(new FileInputStream("./config/application.properties"));
+            checkMandatoryProperties();
+        } catch (IOException e) {
+            logger.severe("Properties files problem: " + e.getMessage());
+            logger.severe("Application will exit now!");
         }
 
-
-
-
     }
 
-    private static String getArgumentsConfigAsStr(){
-        return remoteHost + ":" + remotePort + ", serverPort:" + serverPort;
+    private static void checkMandatoryProperties() {
+        boolean propertiesMissing = false;
+
+        if(properties.get("server.port") == null){
+            logger.severe("Property [server.port] not found.");
+            propertiesMissing = true;
+        }
+
+        if(properties.get("dump1090.tcp.port") == null){
+            logger.severe("Property [dump1090.tcp.port] not found.");
+            propertiesMissing = true;
+        }
+
+        if(properties.get("dump1090.tcp.host") == null){
+            logger.severe("Property [dump1090.tcp.host] not found.");
+            propertiesMissing = true;
+        }
+
+        if(propertiesMissing){
+            logger.severe("Application will exit now!");
+            System.exit(1);
+        }
     }
 
 }

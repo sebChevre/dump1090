@@ -1,35 +1,48 @@
 package ch.sebooom.dump1090.tcp;
 
-import ch.sebooom.dump1090.tcp.messages.Message;
-import ch.sebooom.dump1090.tcp.messages.MessageType;
+import ch.sebooom.dump1090.messages.Message;
+import ch.sebooom.dump1090.messages.MessageType;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * Created by seb on 26.11.16.
+ * TCPStats aggreagate object
  */
 class TCPStats {
 
     private HashMap<MessageType,AtomicInteger> messagesByType = new HashMap<>();
-
-
-    private TCPStats(List<Message> messages){
-
-        messages.forEach(message->{
-
-            messagesByType.putIfAbsent(message.type(), new AtomicInteger(0));
-            messagesByType.get(message.type()).incrementAndGet();
-
-        });
-
-    }
-
+    private Date startTime;
+    private Date stopTime;
+    /**
+     * Static constructor
+     * @param messages list of messages to agregate
+     * @return a new instance
+     */
     static TCPStats from(List<Message> messages) {
         return new TCPStats(messages);
     }
 
+    private TCPStats(List<Message> messages){
+
+        messages.forEach(message->{
+            //add message type as map key if it didnt already exist
+            messagesByType.putIfAbsent(message.type(), new AtomicInteger(0));
+            //increment msg by type counter
+            messagesByType.get(message.type()).incrementAndGet();
+
+        });
+
+
+
+    }
+
+    /**
+     * Return total messages count
+     * @return the total number of messages
+     */
     int getCount() {
         return messagesByType.values().stream()
                 .mapToInt(AtomicInteger::intValue).sum();
@@ -42,10 +55,21 @@ class TCPStats {
                 '}';
     }
 
+    /**
+     * JSONify the instance
+     * @return a json string of the instance
+     */
     String toJson() {
         StringBuilder ret = new StringBuilder("{");
 
-        messagesByType.keySet().forEach(messageType -> ret.append(messageType.toString()).append(":").append(messagesByType.get(messageType).get()).append(","));
+        ret.append("start:").append(startTime.toString()).append(",").append("stop:")
+                .append(stopTime.toString()).append(",")
+                .append("duration:" + (stopTime.getTime()-startTime.getTime()))
+                .append(",");
+
+        messagesByType.keySet().forEach(messageType -> ret
+                .append(messageType.toString()).append(":")
+                .append(messagesByType.get(messageType).get()).append(","));
 
         ret.append("}");
         return ret.toString();

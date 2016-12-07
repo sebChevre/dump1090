@@ -1,4 +1,4 @@
-package ch.sebooom.dump1090.tcp.messages;
+package ch.sebooom.dump1090.messages;
 
 import org.apache.commons.lang.Validate;
 
@@ -6,7 +6,7 @@ import java.util.Arrays;
 import java.util.Optional;
 
 /**
- * Created by seb on 22.11.16.
+ * SBS1 Message type
  */
 public enum MessageType {
 
@@ -40,7 +40,7 @@ public enum MessageType {
 
         Optional<MessageType> messageType = Arrays.asList(MessageType.values())
             .stream()
-                .filter(msg -> msg.toString().equals(fullType.toString()))
+                .filter(msg -> msg.toString().equals(fullType))
             .findFirst();
 
         if(messageType.isPresent()){

@@ -1,20 +1,20 @@
-package ch.sebooom.dump1090.tcp.messages;
+package ch.sebooom.dump1090.messages;
 
 /**
- * Created by seb on 22.11.16.
+ * Model a SBS1 Messsage Fields
  */
-public class Field {
+class Field {
 
     private int fieldPosition;
     private String fieldName;
     private String value;
 
-    public Field(String fieldName, int fieldPosition){
+    Field(String fieldName, int fieldPosition){
         this.fieldName = fieldName;
         this.fieldPosition = fieldPosition;
     }
 
-    public void withValue(String value){
+    void withValue(String value){
         this.value = value;
     }
 
@@ -26,7 +26,7 @@ public class Field {
         return fieldPosition;
     }
 
-    public String getValue(){
+    String getValue(){
         return value;
     }
 

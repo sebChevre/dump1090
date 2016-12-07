@@ -1,11 +1,11 @@
-package ch.sebooom.dump1090.tcp.messages;
+package ch.sebooom.dump1090.messages;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.apache.commons.lang.Validate;
 
 /**
- * Created by seb on 22.11.16.
+ * High Level Message. Encapsulate SBS1 fields and type
  */
 public class Message {
 
@@ -31,12 +31,12 @@ public class Message {
         return message;
     }
 
-    public Message withType(MessageType type){
+    private Message withType(MessageType type){
         this.type = type;
         return this;
     }
 
-    public Message withFields(Fields messageFields){
+    private Message withFields(Fields messageFields){
         this.messageFields = messageFields;
         return this;
     }
