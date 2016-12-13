@@ -1,4 +1,4 @@
-package ch.sebooom.dump1090.messages;
+package ch.sebooom.dump1090.messages.sbs1;
 
 //import org.apache.commons.validator
 

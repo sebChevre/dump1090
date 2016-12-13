@@ -1,23 +1,30 @@
-package ch.sebooom.dump1090.messages;
+package ch.sebooom.dump1090.messages.sbs1;
 
-import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.apache.commons.lang.Validate;
+
+import java.util.Date;
 
 /**
  * High Level Message. Encapsulate SBS1 fields and type
  */
 public class Message {
 
-    private Fields messageFields;
+    //private Fields messageFields;
+    private Field [] fields = new Field[22];
     private MessageType type;
-    private static Gson gson = new GsonBuilder().create();
+
+    private long loggedTimeStamp;
+
 
     public static Message fromTCPString(String tcpString){
         Validate.notEmpty(tcpString); //null et pas vide
         return valideAndDecode(tcpString);
     }
 
+    private Message(){
+        this.loggedTimeStamp = new Date().getTime();
+    }
     private static Message valideAndDecode(String tcpString){
 
         Message message = new Message();
@@ -38,13 +45,21 @@ public class Message {
         return this;
     }
 
-    private Message withFields(Fields messageFields){
-        this.messageFields = messageFields;
+    private Message withFields(Field [] messageFields){
+        this.fields = messageFields;
         return this;
     }
 
+    public Field[] getFields(){
+        return fields;
+    }
+    public long getLoggedTimeStamp(){
+        return loggedTimeStamp;
+    }
     public String toJson(){
-        return messageFields.toJson();
+        GsonBuilder gsonBuilder = new GsonBuilder();
+        gsonBuilder.registerTypeAdapter(Message.class, new JsonMessageAdapter());
+        return gsonBuilder.create().toJson(this);
     }
 
     public MessageType type() {
