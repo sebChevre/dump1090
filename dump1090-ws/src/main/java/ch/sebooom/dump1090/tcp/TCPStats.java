@@ -1,7 +1,7 @@
 package ch.sebooom.dump1090.tcp;
 
-import ch.sebooom.dump1090.messages.Message;
-import ch.sebooom.dump1090.messages.MessageType;
+import ch.sebooom.dump1090.messages.sbs1.Message;
+import ch.sebooom.dump1090.messages.sbs1.MessageType;
 import com.rethinkdb.model.MapObject;
 
 import java.util.HashMap;

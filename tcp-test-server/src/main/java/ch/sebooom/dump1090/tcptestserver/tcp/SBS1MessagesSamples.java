@@ -52,7 +52,7 @@ class SBS1MessagesSamples {
 
     static String getRandomMsg(){
 
-        return messages.get(new Random().nextInt(messages.size()-1)) + "\n";
+        return messages.get(new Random().nextInt(messages.size()-1)) + "\r\n";
     }
 
 

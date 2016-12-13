@@ -58,6 +58,7 @@ class ClientTcpSocketHandler {
         while (this.clientSocket.isConnected()) {
             String msg = SBS1MessagesSamples.getRandomMsg();
 
+            //logger.fine("Message try..");
             out.print(msg);
             logger.fine("Message sent: " + msg);
             out.flush();

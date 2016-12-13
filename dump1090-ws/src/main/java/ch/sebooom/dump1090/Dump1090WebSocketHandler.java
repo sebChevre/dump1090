@@ -35,12 +35,17 @@ public class Dump1090WebSocketHandler {
                 .subscribe(next -> {
                     try {
                         logger.info("From bus: " + next);
-                        session.getRemote().sendString(next.toJson());
-                    } catch (IOException e) {
-                        e.printStackTrace();
+
+                        if (session.isOpen()) {
+                            session.getRemote().sendString(next.toJson());
+                        }
+                    }catch(IOException e){
+                        logger.severe("Client seems to be deconnected: " + e.getMessage());
                     }
-                        }, error -> logger.severe(error.getMessage())
-                        , () -> logger.info("Stream terminated. This is a problem in this context..."));
+                },
+                error -> logger.severe("Client seems to be deconnected: " + error.getMessage()),
+                () -> logger.info("Stream terminated. This is a problem in this context..."));
+
     }
 
     @OnWebSocketClose

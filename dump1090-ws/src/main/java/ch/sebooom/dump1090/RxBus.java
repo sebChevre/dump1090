@@ -1,6 +1,6 @@
 package ch.sebooom.dump1090;
 
-import ch.sebooom.dump1090.messages.Message;
+import ch.sebooom.dump1090.messages.sbs1.Message;
 import rx.Observable;
 import rx.subjects.PublishSubject;
 import rx.subjects.SerializedSubject;

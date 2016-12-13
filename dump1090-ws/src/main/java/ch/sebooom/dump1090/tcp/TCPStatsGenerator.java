@@ -2,8 +2,6 @@ package ch.sebooom.dump1090.tcp;
 
 import ch.sebooom.dump1090.RxBus;
 import com.rethinkdb.RethinkDB;
-import com.rethinkdb.gen.ast.Table;
-import com.rethinkdb.net.Connection;
 import rx.functions.Action0;
 import rx.functions.Action1;
 
@@ -32,8 +30,8 @@ public class TCPStatsGenerator {
 
         logger.info("TCP Stats started");
 
-        Connection connection = r.connection().hostname("localhost").port(28015).connect();
-        Table msgCount = r.db("dump1090").table("msgCount");
+        //Connection connection = r.connection().hostname("localhost").port(28015).connect();
+        //Table msgCount = r.db("dump1090").table("msgCount");
 
         Action1<Throwable> errrorHandler = throwable ->
                 logger.severe("Error during stream processing for ch.sebooom.dump1090.tcptestserver.tcp stats: "

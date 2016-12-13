@@ -1,7 +1,7 @@
 package ch.sebooom.dump1090.tcp;
 
 import ch.sebooom.dump1090.RxBus;
-import ch.sebooom.dump1090.messages.Message;
+import ch.sebooom.dump1090.messages.sbs1.Message;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -51,6 +51,7 @@ public class TCPListener {
 
             }
             catch(Exception e) {
+                e.printStackTrace();
                 logger.severe("Error during ch.sebooom.dump1090.tcptestserver.tcp dump1090 Listenning: " + e.getMessage());
                 logger.severe("System exiting now...");
                 System.exit(1);
