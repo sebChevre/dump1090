@@ -29,7 +29,7 @@ class Fields {
     private Field alert = new Field("Alert", 18);
     private Field emergency = new Field("Emergency", 19);
     private Field sPI = new Field("SPI", 20);
-    private Field isOnGround = new Field("is On Ground", 21);
+    private Field isOnGround = new Field("Is On Ground", 21);
 
     static Fields from(String[] fields) {
 

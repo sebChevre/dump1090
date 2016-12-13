@@ -16,7 +16,7 @@ import java.util.logging.Logger;
  *
  */
 @WebSocket
-class Dump1090WebSocketHandler {
+public class Dump1090WebSocketHandler {
 
     private final static Logger logger = Utils.getFileLogger(Dump1090WebSocketHandler.class.getName());
     private static final Queue<Session> sessions = new ConcurrentLinkedQueue<>();

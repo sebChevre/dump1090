@@ -31,6 +31,8 @@ public class Message {
         return message;
     }
 
+
+
     private Message withType(MessageType type){
         this.type = type;
         return this;

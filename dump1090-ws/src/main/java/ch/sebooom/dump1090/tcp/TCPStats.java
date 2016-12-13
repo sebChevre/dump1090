@@ -2,8 +2,8 @@ package ch.sebooom.dump1090.tcp;
 
 import ch.sebooom.dump1090.messages.Message;
 import ch.sebooom.dump1090.messages.MessageType;
+import com.rethinkdb.model.MapObject;
 
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -11,11 +11,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * TCPStats aggreagate object
  */
-class TCPStats {
+public class TCPStats {
 
     private HashMap<MessageType,AtomicInteger> messagesByType = new HashMap<>();
-    private Date startTime;
-    private Date stopTime;
+
     /**
      * Static constructor
      * @param messages list of messages to agregate
@@ -37,6 +36,22 @@ class TCPStats {
 
 
 
+    }
+
+    public HashMap<MessageType, AtomicInteger> getMessagesByType() {
+        return messagesByType;
+    }
+
+    public MapObject getMapObject(){
+        MapObject mapObject = new MapObject();
+
+
+        messagesByType.keySet().forEach(messageType -> {
+
+            mapObject.with(messageType.toString(),messagesByType.get(messageType));
+        });
+
+        return mapObject;
     }
 
     /**
@@ -62,16 +77,17 @@ class TCPStats {
     String toJson() {
         StringBuilder ret = new StringBuilder("{");
 
-        ret.append("start:").append(startTime.toString()).append(",").append("stop:")
+        /*ret.append("start:").append(startTime.toString()).append(",").append("stop:")
                 .append(stopTime.toString()).append(",")
                 .append("duration:" + (stopTime.getTime()-startTime.getTime()))
-                .append(",");
+                .append(",");*/
 
-        messagesByType.keySet().forEach(messageType -> ret
+        messagesByType.keySet().forEach(messageType ->
+                ret
                 .append(messageType.toString()).append(":")
                 .append(messagesByType.get(messageType).get()).append(","));
+                ret.append("}");
 
-        ret.append("}");
         return ret.toString();
     }
 }
