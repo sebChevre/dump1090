@@ -30,13 +30,11 @@ class Application {
 
             readProperties();
 
-
-
-            //startTCPStats();
-
             startTCPListenning();
 
-        startServer();
+            startTCPStats();
+
+            startServer();
 
     }
 

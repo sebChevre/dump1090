@@ -4,6 +4,8 @@ import ch.sebooom.dump1090.messages.sbs1.Message;
 import ch.sebooom.dump1090.messages.sbs1.MessageType;
 import com.rethinkdb.model.MapObject;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -13,7 +15,11 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class TCPStats {
 
+    private final long totalTime;
     private HashMap<MessageType,AtomicInteger> messagesByType = new HashMap<>();
+    private int totalCount;
+    private long startTime;
+    private long stopTime;
 
     /**
      * Static constructor
@@ -26,6 +32,18 @@ public class TCPStats {
 
     private TCPStats(List<Message> messages){
 
+        Collections.sort(messages, new Comparator<Message>(){
+            public int compare(Message p1, Message p2){
+                return ((Long)p1.getLoggedTimeStamp())
+                        .compareTo(((Long)p2.getLoggedTimeStamp()));
+            }
+        });
+
+        totalCount = messages.size();
+        startTime = messages.get(0).getLoggedTimeStamp();
+        stopTime = messages.get(messages.size()-1).getLoggedTimeStamp();
+        totalTime = stopTime -startTime;
+
         messages.forEach(message->{
             //add message type as map key if it didnt already exist
             messagesByType.putIfAbsent(message.type(), new AtomicInteger(0));
@@ -34,8 +52,6 @@ public class TCPStats {
 
         });
 
-
-
     }
 
     public HashMap<MessageType, AtomicInteger> getMessagesByType() {
@@ -43,15 +59,32 @@ public class TCPStats {
     }
 
     public MapObject getMapObject(){
-        MapObject mapObject = new MapObject();
 
+        /*r.hashMap("tcpMessages", "Jean-Luc Picard")
+                .with("tv_show", "Star Trek TNG")
+                .with("posts", r.array(
+                        r.hashMap("title", "Civil rights")
+                                .with("content", "There are some words I've known since...")
+                        )
+                )*/
+        MapObject root = new MapObject();
 
+        MapObject msgs = new MapObject();
         messagesByType.keySet().forEach(messageType -> {
 
-            mapObject.with(messageType.toString(),messagesByType.get(messageType));
+            msgs.with(messageType.toString(),messagesByType.get(messageType));
         });
 
-        return mapObject;
+        //root.with("byType",msgs);
+
+        root.with("msgs",new MapObject().with("byType",msgs))
+                .with("total",totalCount)
+                .with("start",startTime)
+                .with("stop",stopTime)
+                .with("duration",totalTime);
+
+
+        return root;
     }
 
     /**

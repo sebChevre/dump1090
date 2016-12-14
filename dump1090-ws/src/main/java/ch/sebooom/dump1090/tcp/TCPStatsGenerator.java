@@ -2,6 +2,9 @@ package ch.sebooom.dump1090.tcp;
 
 import ch.sebooom.dump1090.RxBus;
 import com.rethinkdb.RethinkDB;
+import com.rethinkdb.gen.ast.Table;
+import com.rethinkdb.model.MapObject;
+import com.rethinkdb.net.Connection;
 import rx.functions.Action0;
 import rx.functions.Action1;
 
@@ -18,8 +21,13 @@ public class TCPStatsGenerator {
     private int port;
     private RxBus bus;
     public static final RethinkDB r = RethinkDB.r;
+    public Connection rethinkDbConnection;
+    public Table statsTable;
 
     private TCPStatsGenerator() {
+        rethinkDbConnection = r.connection().hostname("localhost").port(28015).connect();
+        statsTable = r.db("dump1090").table("test3");
+
     }
 
     public static TCPStatsGenerator newInstance(){
@@ -30,14 +38,12 @@ public class TCPStatsGenerator {
 
         logger.info("TCP Stats started");
 
-        //Connection connection = r.connection().hostname("localhost").port(28015).connect();
-        //Table msgCount = r.db("dump1090").table("msgCount");
 
         Action1<Throwable> errrorHandler = throwable ->
                 logger.severe("Error during stream processing for ch.sebooom.dump1090.tcptestserver.tcp stats: "
                 + throwable.getMessage());
 
-        Action0 completeHandler = () ->
+       Action0 completeHandler = () ->
                 logger.severe("Stream complete. This wouldnt happend");
 
 //        bus.toObserverable()
@@ -81,14 +87,17 @@ public class TCPStatsGenerator {
 //                }, errrorHandler, completeHandler);
 
         bus.toObserverable()
-                .buffer(1, TimeUnit.SECONDS)
+                .buffer(1, TimeUnit.MINUTES)
                 .map(TCPStats::from)
                 .subscribe(next -> {
 
                     int count = next.getCount();
 
-                    logger.fine(count + " messages received in last seconds");
-                    logger.fine("Stats:" + next.toJson());
+                    MapObject obj = next.getMapObject();
+                    statsTable.insert(obj).run(rethinkDbConnection);
+
+                    logger.info(count + " messages received in last seconds");
+                    logger.info("Stats:" + next.toJson());
 
                 }, errrorHandler, completeHandler);
     }
