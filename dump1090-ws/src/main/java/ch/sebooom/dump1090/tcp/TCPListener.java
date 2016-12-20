@@ -10,6 +10,7 @@ import java.util.logging.Logger;
 
 /**
  * TCP Listener class
+ * Classe écoutant les trames tcp et publiant le résultat sur le bus
  */
 public class TCPListener {
 
@@ -17,6 +18,7 @@ public class TCPListener {
     private int port;
     private String host;
     private RxBus bus;
+    private Boolean running = Boolean.TRUE;
 
     public TCPListener(int port, String host ,RxBus bus){
         this.bus = bus;
@@ -25,9 +27,10 @@ public class TCPListener {
     }
 
 
+    /**
+     * Démarrage de la boucle d'écoute, et publication sur le bus
+     */
     public void start(){
-
-
 
             try {
                 Socket skt = new Socket(host, port);
@@ -37,7 +40,7 @@ public class TCPListener {
                 logger.info("TCP Listenning started [" + host +":" + port +"]");
 
 
-                while(true){
+                while(running){
 
                     while (!in.ready()) {}
 
@@ -56,9 +59,6 @@ public class TCPListener {
                 logger.severe("System exiting now...");
                 System.exit(1);
             }
-
-
-
 
     }
 

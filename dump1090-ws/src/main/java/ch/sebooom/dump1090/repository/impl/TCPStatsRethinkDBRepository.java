@@ -1,24 +1,19 @@
 package ch.sebooom.dump1090.repository.impl;
 
-import java.time.LocalDateTime;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.TimeZone;
-import java.util.concurrent.atomic.AtomicInteger;
-
+import ch.sebooom.dump1090.messages.sbs1.MessageType;
+import ch.sebooom.dump1090.repository.TCPStatsRepository;
+import ch.sebooom.dump1090.tcp.TCPStats;
 import com.rethinkdb.RethinkDB;
-import com.rethinkdb.gen.ast.Max;
 import com.rethinkdb.gen.ast.Table;
 import com.rethinkdb.gen.ast.Time;
 import com.rethinkdb.model.MapObject;
 import com.rethinkdb.net.Connection;
-import com.rethinkdb.net.Cursor;
 
-import ch.sebooom.dump1090.messages.sbs1.MessageType;
-import ch.sebooom.dump1090.repository.TCPStatsRepository;
-import ch.sebooom.dump1090.tcp.TCPStats;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class TCPStatsRethinkDBRepository implements TCPStatsRepository{
 
@@ -70,7 +65,10 @@ public class TCPStatsRethinkDBRepository implements TCPStatsRepository{
         		.with("timing", new MapObject()
         				.with("duration",tcpStats.getTotalTime())
         				.with("start",start)
-        				.with("stop",stop));
+						.with("start_millis",tcpStats.getStartTime())
+        				.with("stop",stop)
+								.with("stop_millis",tcpStats.getStopTime()));
+
                 
 	}
 
@@ -80,7 +78,7 @@ public class TCPStatsRethinkDBRepository implements TCPStatsRepository{
 		Map a = null;
 		
 		try{
-			a = statsTable.max(stats -> stats.g("date").g("start")).run(rethinkDbConnection);
+			a = statsTable.max(stats -> stats.g("timing").g("start")).run(rethinkDbConnection);
 			System.out.println(a);
 			
 		}catch(Exception e){
@@ -90,7 +88,35 @@ public class TCPStatsRethinkDBRepository implements TCPStatsRepository{
 		
 		return  a;
 	}
-	
-	
+
+	@Override
+	public List<Map> findByStartAndStopDate(Long start, Long stop) {
+
+
+		LocalDateTime startDate = LocalDateTime.ofInstant(Instant.ofEpochMilli(start), ZoneId.systemDefault());
+		LocalDateTime stopDate = LocalDateTime.ofInstant(Instant.ofEpochMilli(stop), ZoneId.systemDefault());
+
+		Time startTime = r.time(startDate.getYear(),startDate.getMonth().getValue(),startDate.getDayOfMonth()
+				,startDate.getHour(),startDate.getMinute(),startDate.getSecond(),"Z");
+		Time stopTime = r.time(stopDate.getYear(),stopDate.getMonth().getValue(),stopDate.getDayOfMonth()
+				,stopDate.getHour(),stopDate.getMinute(),stopDate.getSecond(),"Z");
+
+		List c = null;
+
+
+		try{
+			c = statsTable.filter(row ->
+					row.g("timing").g("start").during(startTime, stopTime)
+			).orderBy(r.asc(doc ->
+					doc.g("timing").g("start")
+			)).run(rethinkDbConnection);
+
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+
+		return c;
+	}
+
 
 }

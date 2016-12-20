@@ -3,8 +3,6 @@ package ch.sebooom.dump1090.messages.sbs1;
 import com.google.gson.GsonBuilder;
 import org.apache.commons.lang.Validate;
 
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
 import java.util.Date;
 
 /**
@@ -12,11 +10,10 @@ import java.util.Date;
  */
 public class Message {
 
-    //private Fields messageFields;
+
     private Field [] fields = new Field[22];
     private MessageType type;
-
-    private long loggedTimeStamp;
+    private long loggedTimeStamp;       //timestamp message from tcp
 
 
     public static Message fromTCPString(String tcpString){
@@ -25,8 +22,10 @@ public class Message {
     }
 
     private Message(){
+
         this.loggedTimeStamp = new Date().getTime();
     }
+
     private static Message valideAndDecode(String tcpString){
 
         Message message = new Message();

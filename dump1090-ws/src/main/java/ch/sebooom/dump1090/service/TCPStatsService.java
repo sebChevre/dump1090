@@ -1,13 +1,16 @@
 package ch.sebooom.dump1090.service;
 
-import java.util.Map;
-
 import ch.sebooom.dump1090.tcp.TCPStats;
+import ch.sebooom.dump1090.tcp.TCPStatsAggregator;
+
+import java.util.Map;
 
 public interface TCPStatsService {
 
-	public void saveStats(TCPStats next);
+	void saveStats(TCPStats next);
 	
-	public Map findLastStats();
+	Map findLastStats();
+
+	TCPStatsAggregator findByPeriod(Long start, Long stop);
 
 }

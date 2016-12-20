@@ -2,11 +2,6 @@ package ch.sebooom.dump1090.tcp;
 
 import ch.sebooom.dump1090.RxBus;
 import ch.sebooom.dump1090.service.TCPStatsService;
-
-import com.rethinkdb.RethinkDB;
-import com.rethinkdb.gen.ast.Table;
-import com.rethinkdb.model.MapObject;
-import com.rethinkdb.net.Connection;
 import rx.functions.Action0;
 import rx.functions.Action1;
 
@@ -22,8 +17,12 @@ public class TCPStatsGenerator {
     private final static Logger logger = Logger.getLogger(TCPStatsGenerator.class.getName());
     private RxBus bus;
     private TCPStatsService tcpStatsService;
-    
-    
+
+
+    /**
+     * Constructeur privé appelé par la factory static
+     * @param service le service des stats
+     */
     private TCPStatsGenerator(TCPStatsService service) {
         tcpStatsService = service;
     }
@@ -37,23 +36,23 @@ public class TCPStatsGenerator {
         logger.info("TCP Stats started");
 
 
+        //error handler
         Action1<Throwable> errrorHandler = throwable ->
                 logger.severe("Error during stream processing for ch.sebooom.dump1090.tcptestserver.tcp stats: "
                 + throwable.getMessage());
-
-       Action0 completeHandler = () ->
+        //complete handler
+        Action0 completeHandler = () ->
                 logger.severe("Stream complete. This wouldnt happend");
 
-
-
+        //Traietement des messages venat du bus (flux tcp)
         bus.toObserverable()
-                .buffer(1, TimeUnit.MINUTES)
-                .map(TCPStats::from)
+                .buffer(1, TimeUnit.MINUTES)            //toutes les minutes
+                .map(TCPStats::from)                    //instanciation d'un objet TCPStats
                 .subscribe(next -> {
                 	
-                	tcpStatsService.saveStats(next);
+                	tcpStatsService.saveStats(next);    //persistance db
 
-                    int count = next.getTotalCount();
+                    int count = next.getTotalCount();   //total pour log
                    
                     logger.info(count + " messages received in last seconds");
                     logger.info("Stats:" + next.toJson());
@@ -62,8 +61,11 @@ public class TCPStatsGenerator {
     }
 
 
-
-
+    /**
+     * Setter permettant d'injecter le bus
+     * @param bus le bus de données interne
+     * @return l'instance courante
+     */
     public TCPStatsGenerator withBus(RxBus bus) {
         this.bus = bus;
         return this;

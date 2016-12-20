@@ -2,16 +2,10 @@ package ch.sebooom.dump1090.tcp;
 
 import ch.sebooom.dump1090.messages.sbs1.Message;
 import ch.sebooom.dump1090.messages.sbs1.MessageType;
-
 import com.google.gson.JsonObject;
-import com.rethinkdb.model.MapObject;
 
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -24,10 +18,8 @@ public class TCPStats {
     private final long totalTime;
     private HashMap<MessageType,AtomicInteger> messagesByType = new HashMap<>();
     private HashMap<MessageType,AtomicInteger> messagesByPlane = new HashMap<>();
-    private int totalCount;
     private long startTime;
     private long stopTime;
-    private final static ZoneId zoneId = ZoneId.systemDefault();
 
     /**
      * Static constructor
@@ -38,6 +30,8 @@ public class TCPStats {
         return new TCPStats(messages);
     }
 
+
+
     private TCPStats(List<Message> messages){
 
         Collections.sort(messages, new Comparator<Message>(){
@@ -47,11 +41,8 @@ public class TCPStats {
             }
         });
 
-        totalCount = messages.size();
         
-         
-        
-        //long epoch = message.getLoggedDateTime().atZone(zoneId).toEpochSecond();
+
         startTime = messages.get(0).getLoggedTimeStamp();
         stopTime = messages.get(messages.size()-1).getLoggedTimeStamp();
         totalTime = stopTime-startTime;
@@ -66,6 +57,8 @@ public class TCPStats {
         });
 
     }
+
+
 
     public HashMap<MessageType, AtomicInteger> getMessagesByType() {
         return messagesByType;

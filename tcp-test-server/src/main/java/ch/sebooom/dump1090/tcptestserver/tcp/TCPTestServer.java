@@ -19,6 +19,7 @@ public class TCPTestServer {
     private final static int nbThread = 4;
     private final static Logger logger = Logger.getLogger(TCPTestServer.class.getName());
     private static Random random = new Random();
+    private static Boolean running = Boolean.TRUE;
 
     public static void main(String args[]) throws IOException {
 
@@ -31,7 +32,7 @@ public class TCPTestServer {
 
             serverSocket = new ServerSocket(port);
 
-            while(true){
+            while(running){
                 Socket clientSocket = serverSocket.accept();
 
                 executorService.execute(() -> {
@@ -48,6 +49,7 @@ public class TCPTestServer {
         }
         catch(Exception e) {
             logger.severe("Application exit: " + e.getMessage());
+            assert serverSocket != null;
             serverSocket.close();
             System.exit(1);
         }

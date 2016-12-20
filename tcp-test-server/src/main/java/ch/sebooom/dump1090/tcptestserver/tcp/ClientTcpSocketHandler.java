@@ -12,7 +12,7 @@ import java.util.logging.Logger;
  */
 class ClientTcpSocketHandler {
 
-    final static Logger logger = Logger.getLogger(ClientTcpSocketHandler.class.getName());
+    private final static Logger logger = Logger.getLogger(ClientTcpSocketHandler.class.getName());
     private static Random random = new Random();
     private PrintWriter out;
     private Socket clientSocket;

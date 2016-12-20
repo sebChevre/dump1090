@@ -1,49 +1,37 @@
 package ch.sebooom.dump1090;
 
 
+import ch.sebooom.dump1090.http.Server;
 import ch.sebooom.dump1090.repository.TCPStatsRepository;
 import ch.sebooom.dump1090.repository.impl.TCPStatsRethinkDBRepository;
 import ch.sebooom.dump1090.service.TCPStatsService;
 import ch.sebooom.dump1090.service.impl.TCPStatsServiceImpl;
 import ch.sebooom.dump1090.tcp.TCPListener;
 import ch.sebooom.dump1090.tcp.TCPStatsGenerator;
+import org.apache.commons.cli.MissingArgumentException;
 
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.util.Properties;
 import java.util.concurrent.Executors;
 import java.util.logging.Logger;
 
-import com.rethinkdb.net.Connection;
-
 /**
  * Point d'entrée de l'application
  *
- * Paramètres: -rp (dump109 ch.sebooom.dump1090.tcptestserver.tcp port, défaut:30003),
- *             -rh (hote dump1090, défaut:localhost)
- *             -sp (port serveur ws, défaut:9999)
- * Exemple: -sp 9898 -rh 192.168.1.109 -rp 30003
  */
 class Application {
 
     private final static Logger logger = Logger.getLogger(Application.class.getName());
-
+    //Bus interne d'échange de données
     private static RxBus bus = new RxBus();
     private static Properties properties = new Properties();
     
 
     public static void main(String[] args) {
 
-            readProperties();
-            
-          //define db params
-            String rethinkDBHost = properties.getProperty("rethinkdb.host");
-            int port = Integer.parseInt(properties.getProperty("rethinkdb.port"));
-            String db = properties.getProperty("rethinkdb.db");
-            
-        	//service and repo impl...
-        	TCPStatsRepository repository = new TCPStatsRethinkDBRepository(rethinkDBHost, port, db);
-        	TCPStatsService service = new TCPStatsServiceImpl(repository);
+            validProperties();
+
+        	TCPStatsService service = initService();
               
             startTCPListenning();
 
@@ -53,10 +41,34 @@ class Application {
 
     }
 
+    /**
+     * Initilaisation du service
+     * @return une instance du service
+     */
+    private static TCPStatsService initService(){
+
+        return new TCPStatsServiceImpl(initRepository());
+    }
+
+    /**
+     * Initiliaisation du repository
+     * @return une instance du repository
+     */
+    private static TCPStatsRepository initRepository(){
+
+        String rethinkDBHost = properties.getProperty("rethinkdb.host");
+        int port = Integer.parseInt(properties.getProperty("rethinkdb.port"));
+        String db = properties.getProperty("rethinkdb.db");
+
+        return new TCPStatsRethinkDBRepository(rethinkDBHost, port, db);
+    }
+
+    /**
+     * Démarage du service de statistique
+     * @param service l'instance du service des stats
+     */
     private static void startTCPStats(TCPStatsService service) {
 
-    	
-    	    	
         logger.info("Starting ch.sebooom.dump1090.tcptestserver.tcp stats...");
 
         Executors.newSingleThreadExecutor().execute(() -> 
@@ -65,6 +77,10 @@ class Application {
 
     }
 
+    /**
+     * Démarrage du serveur http
+     * @param service
+     */
     private static void startServer(TCPStatsService service) {
         int port = Integer.parseInt(properties.getProperty("server.port"));
 
@@ -76,7 +92,11 @@ class Application {
 
     }
 
+    /**
+     * Démarrage du thread d'écoute et de traitement des trames tcp
+     */
     private static void startTCPListenning() {
+
         String tcpHost = properties.getProperty("dump1090.tcp.host");
         int tcpPort = Integer.parseInt(properties.getProperty("dump1090.tcp.port"));
 
@@ -89,19 +109,28 @@ class Application {
     }
 
 
-    private static void readProperties () {
+    /**
+     * Validation des propriétés
+     * Si probléme, fin de l'application
+     */
+    private static void validProperties() {
 
         try {
             properties.load(new FileInputStream("./config/application.properties"));
             checkMandatoryProperties();
-        } catch (IOException e) {
+        } catch (Exception e) {
             logger.severe("Properties files problem: " + e.getMessage());
             logger.severe("Application will exit now!");
+            System.exit(1);
         }
 
     }
 
-    private static void checkMandatoryProperties() {
+    /**
+     * Validation des propriétés applicative
+     * @throws MissingArgumentException levé si au moins une propriété manque
+     */
+    private static void checkMandatoryProperties() throws MissingArgumentException {
         boolean propertiesMissing = false;
 
         if(properties.get("server.port") == null){
@@ -141,7 +170,7 @@ class Application {
 
         if(propertiesMissing){
             logger.severe("Application will exit now!");
-            System.exit(1);
+            throw new MissingArgumentException("At least one properties missing, check log");
         }
         
         

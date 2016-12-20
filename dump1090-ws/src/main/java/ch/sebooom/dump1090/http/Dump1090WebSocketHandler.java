@@ -1,6 +1,6 @@
-package ch.sebooom.dump1090;
+package ch.sebooom.dump1090.http;
 
-import ch.sebooom.dump1090.utils.Utils;
+import ch.sebooom.dump1090.RxBus;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketClose;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketConnect;
@@ -18,7 +18,7 @@ import java.util.logging.Logger;
 @WebSocket
 public class Dump1090WebSocketHandler {
 
-    private final static Logger logger = Utils.getFileLogger(Dump1090WebSocketHandler.class.getName());
+    private final static Logger logger = Logger.getLogger(Dump1090WebSocketHandler.class.getName());
     private static final Queue<Session> sessions = new ConcurrentLinkedQueue<>();
     private final RxBus bus;
 

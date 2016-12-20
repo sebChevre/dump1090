@@ -1,6 +1,7 @@
-package ch.sebooom.dump1090;
+package ch.sebooom.dump1090.messages;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import spark.ResponseTransformer;
 
 /**
@@ -10,7 +11,7 @@ import spark.ResponseTransformer;
  */
 public class JsonTransformer implements ResponseTransformer {
 
-    private Gson gson = new Gson();
+    private Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
     @Override
     public String render(Object model) {
