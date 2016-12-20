@@ -17,6 +17,7 @@ public class TCPStats {
 
     private final long totalTime;
     private HashMap<MessageType,AtomicInteger> messagesByType = new HashMap<>();
+    private HashMap<MessageType,AtomicInteger> messagesByPlane = new HashMap<>();
     private int totalCount;
     private long startTime;
     private long stopTime;
@@ -47,6 +48,7 @@ public class TCPStats {
         messages.forEach(message->{
             //add message type as map key if it didnt already exist
             messagesByType.putIfAbsent(message.type(), new AtomicInteger(0));
+            
             //increment msg by type counter
             messagesByType.get(message.type()).incrementAndGet();
 
@@ -58,45 +60,30 @@ public class TCPStats {
         return messagesByType;
     }
 
-    public MapObject getMapObject(){
-
-        /*r.hashMap("tcpMessages", "Jean-Luc Picard")
-                .with("tv_show", "Star Trek TNG")
-                .with("posts", r.array(
-                        r.hashMap("title", "Civil rights")
-                                .with("content", "There are some words I've known since...")
-                        )
-                )*/
-        MapObject root = new MapObject();
-
-        MapObject msgs = new MapObject();
-        messagesByType.keySet().forEach(messageType -> {
-
-            msgs.with(messageType.toString(),messagesByType.get(messageType));
-        });
-
-        //root.with("byType",msgs);
-
-        root.with("msgs",new MapObject().with("byType",msgs))
-                .with("total",totalCount)
-                .with("start",startTime)
-                .with("stop",stopTime)
-                .with("duration",totalTime);
-
-
-        return root;
-    }
+   
 
     /**
      * Return total messages count
      * @return the total number of messages
      */
-    int getCount() {
+    public int getTotalCount() {
         return messagesByType.values().stream()
                 .mapToInt(AtomicInteger::intValue).sum();
     }
 
-    @Override
+    public long getTotalTime() {
+		return totalTime;
+	}
+
+	public long getStartTime() {
+		return startTime;
+	}
+
+	public long getStopTime() {
+		return stopTime;
+	}
+
+	@Override
     public String toString() {
         return "TCPStats{" +
                 "messagesByType=" + messagesByType +
@@ -110,10 +97,6 @@ public class TCPStats {
     String toJson() {
         StringBuilder ret = new StringBuilder("{");
 
-        /*ret.append("start:").append(startTime.toString()).append(",").append("stop:")
-                .append(stopTime.toString()).append(",")
-                .append("duration:" + (stopTime.getTime()-startTime.getTime()))
-                .append(",");*/
 
         messagesByType.keySet().forEach(messageType ->
                 ret

@@ -1,6 +1,10 @@
 package ch.sebooom.dump1090;
 
 
+import ch.sebooom.dump1090.repository.TCPStatsRepository;
+import ch.sebooom.dump1090.repository.impl.TCPStatsRethinkDBRepository;
+import ch.sebooom.dump1090.service.TCPStatsService;
+import ch.sebooom.dump1090.service.impl.TCPStatsServiceImpl;
 import ch.sebooom.dump1090.tcp.TCPListener;
 import ch.sebooom.dump1090.tcp.TCPStatsGenerator;
 
@@ -9,6 +13,8 @@ import java.io.IOException;
 import java.util.Properties;
 import java.util.concurrent.Executors;
 import java.util.logging.Logger;
+
+import com.rethinkdb.net.Connection;
 
 /**
  * Point d'entrée de l'application
@@ -24,36 +30,47 @@ class Application {
 
     private static RxBus bus = new RxBus();
     private static Properties properties = new Properties();
-
+    
 
     public static void main(String[] args) {
 
             readProperties();
-
+            
+          //define db params
+            String rethinkDBHost = properties.getProperty("rethinkdb.host");
+            int port = Integer.parseInt(properties.getProperty("rethinkdb.port"));
+            String db = properties.getProperty("rethinkdb.db");
+            
+        	//service and repo impl...
+        	TCPStatsRepository repository = new TCPStatsRethinkDBRepository(rethinkDBHost, port, db);
+        	TCPStatsService service = new TCPStatsServiceImpl(repository);
+              
             startTCPListenning();
 
-            startTCPStats();
+            startTCPStats(service);
 
-            startServer();
+            startServer(service);
 
     }
 
-    private static void startTCPStats() {
+    private static void startTCPStats(TCPStatsService service) {
 
+    	
+    	    	
         logger.info("Starting ch.sebooom.dump1090.tcptestserver.tcp stats...");
 
-
-        Executors.newSingleThreadExecutor().execute(() -> TCPStatsGenerator.newInstance()
+        Executors.newSingleThreadExecutor().execute(() -> 
+        	TCPStatsGenerator.newInstance(service)
                 .withBus(bus).start());
 
     }
 
-    private static void startServer() {
+    private static void startServer(TCPStatsService service) {
         int port = Integer.parseInt(properties.getProperty("server.port"));
 
         logger.info("Starting server on port: " + port);
 
-        Executors.newSingleThreadExecutor().execute(() -> Server.newInstance()
+        Executors.newSingleThreadExecutor().execute(() -> Server.newInstance(service)
                 .withPort(port)
                 .withBus(bus).start());
 
@@ -106,6 +123,28 @@ class Application {
             logger.severe("Application will exit now!");
             System.exit(1);
         }
+        
+        if(properties.get("rethinkdb.host") == null){
+            logger.severe("Property [rethinkdb.host] not found.");
+            propertiesMissing = true;
+        }
+        
+        if(properties.get("rethinkdb.port") == null){
+            logger.severe("Property [rethinkdb.port] not found.");
+            propertiesMissing = true;
+        }
+        
+        if(properties.get("rethinkdb.db") == null){
+            logger.severe("Property [rethinkdb.db] not found.");
+            propertiesMissing = true;
+        }
+
+        if(propertiesMissing){
+            logger.severe("Application will exit now!");
+            System.exit(1);
+        }
+        
+        
     }
 
 }

@@ -1,9 +1,16 @@
 package ch.sebooom.dump1090;
 
 import ch.sebooom.dump1090.messages.TestMessage;
+import ch.sebooom.dump1090.repository.TCPStatsRepository;
+import ch.sebooom.dump1090.service.TCPStatsService;
 import spark.Spark;
 
+import java.util.Map;
 import java.util.logging.Logger;
+
+import com.rethinkdb.RethinkDB;
+import com.rethinkdb.net.Connection;
+import com.rethinkdb.net.Cursor;
 
 import static spark.Spark.before;
 import static spark.Spark.options;
@@ -13,16 +20,19 @@ import static spark.Spark.options;
  */
 public class Server {
 
-
+	
     private int port;
     private RxBus bus;
     final static Logger logger = Logger.getLogger(Server.class.getName());
+    public TCPStatsService statsService;
 
-    public static Server newInstance(){
-        return new Server();
+    public static Server newInstance(TCPStatsService service){
+        return new Server(service);
     }
 
-    private Server(){}
+    private Server(TCPStatsService service){
+    	this.statsService = service;
+    }
 
     public void start(){
         Spark.port(port);
@@ -36,6 +46,40 @@ public class Server {
             return new TestMessage();
         }, new JsonTransformer());
 
+        Spark.get("/stats/:level", (request, response) -> {
+        	String level = request.params(":level");
+        	
+        	switch(level){
+        		
+        		case "all":
+        		break;
+        		
+        		case "last":
+        			
+        			return statsService.findLastStats();
+        			
+        			
+//        			Connection rethinkDbConnection = r.connection().hostname("localhost").port(28015).connect();
+//        			Cursor cursor = null;
+//        			
+//        			try{
+//        				cursor = r.db("dump1090").table("test3").max("start").filter(row -> row.max("start")).run(rethinkDbConnection);
+//        			}catch(Exception e){
+//        				e.printStackTrace();
+//        			}
+//        			
+//        			Map m = (Map)cursor.toList().get(0);
+//        			
+//        			for (Object doc : cursor) {
+//        			    System.out.println(doc);
+//        			}
+        		
+        		
+        	}
+        	
+            return "Hello: " + request.params(":level");
+        });
+       
 
 
         Spark.init();
