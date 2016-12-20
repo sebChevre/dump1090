@@ -53,7 +53,7 @@ public class TCPStatsAggregator {
 
     private String getDurationAsHumanReadable(Long duration){
 
-       return String.format("%02d:%02d:%02d", TimeUnit.MILLISECONDS.toHours(duration),
+       return String.format("%3d:%02d:%02d", TimeUnit.MILLISECONDS.toHours(duration),
                 TimeUnit.MILLISECONDS.toMinutes(duration) % TimeUnit.HOURS.toMinutes(1),
                 TimeUnit.MILLISECONDS.toSeconds(duration) % TimeUnit.MINUTES.toSeconds(1));
 
