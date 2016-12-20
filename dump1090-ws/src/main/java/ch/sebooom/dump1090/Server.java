@@ -8,6 +8,8 @@ import spark.Spark;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.rethinkdb.RethinkDB;
 import com.rethinkdb.net.Connection;
 import com.rethinkdb.net.Cursor;
@@ -23,8 +25,9 @@ public class Server {
 	
     private int port;
     private RxBus bus;
-    final static Logger logger = Logger.getLogger(Server.class.getName());
+    static final Logger logger = Logger.getLogger(Server.class.getName());
     public TCPStatsService statsService;
+    private Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
     public static Server newInstance(TCPStatsService service){
         return new Server(service);
@@ -46,39 +49,22 @@ public class Server {
             return new TestMessage();
         }, new JsonTransformer());
 
-        Spark.get("/stats/:level", (request, response) -> {
-        	String level = request.params(":level");
+        Spark.get("/stats/last","application/json", (request, response) -> {
         	
-        	switch(level){
-        		
-        		case "all":
-        		break;
-        		
-        		case "last":
-        			
-        			return statsService.findLastStats();
-        			
-        			
-//        			Connection rethinkDbConnection = r.connection().hostname("localhost").port(28015).connect();
-//        			Cursor cursor = null;
-//        			
-//        			try{
-//        				cursor = r.db("dump1090").table("test3").max("start").filter(row -> row.max("start")).run(rethinkDbConnection);
-//        			}catch(Exception e){
-//        				e.printStackTrace();
-//        			}
-//        			
-//        			Map m = (Map)cursor.toList().get(0);
-//        			
-//        			for (Object doc : cursor) {
-//        			    System.out.println(doc);
-//        			}
-        		
-        		
-        	}
+        	return gson.toJson(statsService.findLastStats());
         	
-            return "Hello: " + request.params(":level");
         });
+        
+        Spark.get("/stats/from/:from/to/:to","application/json", (request, response) -> {
+        	
+        	String start = request.params("from");
+        	String stop = request.params("to");
+        	
+        	return gson.toJson(statsService.findLastStats());
+        	
+        });
+        
+        
        
 
 
@@ -100,6 +86,9 @@ public class Server {
         return this;
     }
 
+    /**
+     * Enable CORS request for all rest endpoint
+     */
     private static void enableCORS(final String origin, final String methods, final String headers) {
 
         options("/*", (request, response) -> {

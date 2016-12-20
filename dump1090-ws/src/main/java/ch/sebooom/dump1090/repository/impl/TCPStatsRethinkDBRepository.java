@@ -1,15 +1,20 @@
 package ch.sebooom.dump1090.repository.impl;
 
+import java.time.LocalDateTime;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TimeZone;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.rethinkdb.RethinkDB;
 import com.rethinkdb.gen.ast.Max;
 import com.rethinkdb.gen.ast.Table;
+import com.rethinkdb.gen.ast.Time;
 import com.rethinkdb.model.MapObject;
 import com.rethinkdb.net.Connection;
+import com.rethinkdb.net.Cursor;
 
 import ch.sebooom.dump1090.messages.sbs1.MessageType;
 import ch.sebooom.dump1090.repository.TCPStatsRepository;
@@ -44,14 +49,29 @@ public class TCPStatsRethinkDBRepository implements TCPStatsRepository{
             msgs.with(messageType.toString(),messagesByType.get(messageType));
         });
 
-        return  new MapObject().with("msgs",new MapObject().with("byType",msgs))
-        		.with("date", new MapObject()
-        				.with("total",tcpStats.getTotalCount())
-        				.with("start",tcpStats.getStartTime())
-        				.with("stop",tcpStats.getStopTime())
-        				.with("stop_date", new Date(tcpStats.getStopTime()).toString())
-        				.with("start_date", new Date(tcpStats.getStartTime()).toString()))
-                .with("duration",tcpStats.getTotalTime());
+        Calendar cstart = Calendar.getInstance();
+        cstart.setTime(new Date(tcpStats.getStartTime()));
+        
+        Calendar cstop = Calendar.getInstance();
+        cstop.setTime(new Date(tcpStats.getStopTime()));
+        
+        Time start = r.time(cstart.get(Calendar.YEAR), cstart.get(Calendar.MONTH)+1, cstart.get(Calendar.DAY_OF_MONTH), 
+        		cstart.get(Calendar.HOUR_OF_DAY),cstart.get(Calendar.MINUTE),cstart.get(Calendar.SECOND),"Z");
+        
+        Time stop = r.time(cstop.get(Calendar.YEAR), cstop.get(Calendar.MONTH)+1, cstop.get(Calendar.DAY_OF_MONTH), 
+        		cstop.get(Calendar.HOUR_OF_DAY),cstop.get(Calendar.MINUTE),cstop.get(Calendar.SECOND),"Z");
+        
+        
+        
+        
+        
+        return  new MapObject().with("msgs",new MapObject().with("byType",msgs)
+        		.with("total",tcpStats.getTotalCount()))
+        		.with("timing", new MapObject()
+        				.with("duration",tcpStats.getTotalTime())
+        				.with("start",start)
+        				.with("stop",stop));
+                
 	}
 
 	@Override
@@ -70,5 +90,7 @@ public class TCPStatsRethinkDBRepository implements TCPStatsRepository{
 		
 		return  a;
 	}
+	
+	
 
 }

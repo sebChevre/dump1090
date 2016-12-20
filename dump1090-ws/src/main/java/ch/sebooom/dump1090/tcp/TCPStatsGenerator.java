@@ -54,7 +54,6 @@ public class TCPStatsGenerator {
                 	tcpStatsService.saveStats(next);
 
                     int count = next.getTotalCount();
-
                    
                     logger.info(count + " messages received in last seconds");
                     logger.info("Stats:" + next.toJson());

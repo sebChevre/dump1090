@@ -3,6 +3,8 @@ package ch.sebooom.dump1090.messages.sbs1;
 import com.google.gson.GsonBuilder;
 import org.apache.commons.lang.Validate;
 
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.Date;
 
 /**

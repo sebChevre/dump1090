@@ -2,10 +2,16 @@ package ch.sebooom.dump1090.tcp;
 
 import ch.sebooom.dump1090.messages.sbs1.Message;
 import ch.sebooom.dump1090.messages.sbs1.MessageType;
+
+import com.google.gson.JsonObject;
 import com.rethinkdb.model.MapObject;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -21,6 +27,7 @@ public class TCPStats {
     private int totalCount;
     private long startTime;
     private long stopTime;
+    private final static ZoneId zoneId = ZoneId.systemDefault();
 
     /**
      * Static constructor
@@ -41,10 +48,14 @@ public class TCPStats {
         });
 
         totalCount = messages.size();
+        
+         
+        
+        //long epoch = message.getLoggedDateTime().atZone(zoneId).toEpochSecond();
         startTime = messages.get(0).getLoggedTimeStamp();
         stopTime = messages.get(messages.size()-1).getLoggedTimeStamp();
-        totalTime = stopTime -startTime;
-
+        totalTime = stopTime-startTime;
+        
         messages.forEach(message->{
             //add message type as map key if it didnt already exist
             messagesByType.putIfAbsent(message.type(), new AtomicInteger(0));
@@ -95,15 +106,14 @@ public class TCPStats {
      * @return a json string of the instance
      */
     String toJson() {
-        StringBuilder ret = new StringBuilder("{");
-
-
+    	
+        JsonObject json = new JsonObject();
+        
         messagesByType.keySet().forEach(messageType ->
-                ret
-                .append(messageType.toString()).append(":")
-                .append(messagesByType.get(messageType).get()).append(","));
-                ret.append("}");
-
-        return ret.toString();
+        	json.addProperty(messageType.toString(), messagesByType.get(messageType).get())
+        );
+       
+        
+        return json.toString();
     }
 }
