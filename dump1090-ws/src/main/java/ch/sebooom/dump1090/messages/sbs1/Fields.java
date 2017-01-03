@@ -5,9 +5,10 @@ package ch.sebooom.dump1090.messages.sbs1;
 
  ${VERSION}
  */
-class Fields {
+public class Fields {
 
 
+    public static final int ICAO_IDENT = 4;
 
 
     static Field[] from(String[] fields) {

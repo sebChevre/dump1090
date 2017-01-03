@@ -38,18 +38,21 @@ public class TCPStatsGenerator {
 
         //error handler
         Action1<Throwable> errrorHandler = throwable ->
+
                 logger.severe("Error during stream processing for ch.sebooom.dump1090.tcptestserver.tcp stats: "
                 + throwable.getMessage());
+
         //complete handler
         Action0 completeHandler = () ->
                 logger.severe("Stream complete. This wouldnt happend");
 
         //Traietement des messages venat du bus (flux tcp)
         bus.toObserverable()
-                .buffer(1, TimeUnit.MINUTES)            //toutes les minutes
+                .buffer(10, TimeUnit.SECONDS)            //toutes les minutes
                 .map(TCPStats::from)                    //instanciation d'un objet TCPStats
                 .subscribe(next -> {
-                	
+
+
                 	tcpStatsService.saveStats(next);    //persistance db
 
                     int count = next.getTotalCount();   //total pour log

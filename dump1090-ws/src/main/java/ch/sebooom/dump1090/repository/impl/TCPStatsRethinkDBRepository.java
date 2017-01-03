@@ -22,9 +22,9 @@ public class TCPStatsRethinkDBRepository implements TCPStatsRepository{
 	private  Table statsTable;
 	private static final String STATS_TABLE_NAME = "test3";
 	
-	public TCPStatsRethinkDBRepository(String rethinkDBHost, int port, String db) {
+	public TCPStatsRethinkDBRepository(String rethinkDBHost, int port, String db, String table) {
 		rethinkDbConnection = r.connection().hostname("localhost").port(28015).connect();
-		statsTable = r.db(db).table(STATS_TABLE_NAME);
+		statsTable = r.db(db).table(table);
 	}
 
 	@Override

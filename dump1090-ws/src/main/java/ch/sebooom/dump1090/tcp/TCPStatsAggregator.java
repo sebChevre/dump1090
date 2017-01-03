@@ -2,7 +2,7 @@ package ch.sebooom.dump1090.tcp;
 
 import ch.sebooom.dump1090.messages.sbs1.MessageType;
 
-import java.time.OffsetDateTime;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,21 +32,33 @@ public class TCPStatsAggregator {
     private TCPStatsAggregator(List<Map> messages){
 
 
-        Map rootStart = ((Map)messages.get(0));
-        Map timingStart = (Map)rootStart.get("timing");
-        OffsetDateTime start = (OffsetDateTime) timingStart.get("start");
-
-        Map rootStop = ((Map)messages.get(messages.size()-1));
-        Map timingStop = (Map)rootStop.get("timing");
-        OffsetDateTime stop = (OffsetDateTime) timingStop.get("stop");
+        System.out.println("ok1:");
 
 
+        try{
+            Map rootStart = messages.get(0);
+            Map timingStart = (Map)rootStart.get("timing");
+            long startMillis = (long) timingStart.get("start_millis");
 
-        totalPeriodDuration = getDurationAsHumanReadable((stop.toEpochSecond()*1000) - (start.toEpochSecond()*1000));
-        startAggregationDate = start.toString();
-        stopAggreagtionDate = stop.toString();
 
-        messages.stream().forEach(entity -> dealEntity(entity));
+            Map rootStop = messages.get(messages.size()-1);
+            Map timingStop = (Map)rootStop.get("timing");
+            long stopMillis = (long) timingStop.get("stop_millis");
+
+            System.out.println("duration: " + (stopMillis - startMillis));
+
+
+            totalPeriodDuration = getDurationAsHumanReadable(stopMillis - startMillis);
+            startAggregationDate = new Date(startMillis).toString();
+            stopAggreagtionDate = new Date(stopMillis).toString();
+
+            messages.stream().forEach(entity -> dealEntity(entity));
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
+
+
 
 
     }
@@ -62,7 +74,7 @@ public class TCPStatsAggregator {
     private void dealEntity(Map entity){
 
         Map msgs = (Map)entity.get("msgs");
-        Map<String,Long> msgByType = (Map<String,Long>)msgs.get("byType");
+        Map<String,Integer> msgByType = (Map<String,Integer>)msgs.get("byType");
 
         msgByType.keySet().forEach(msgType -> {
 

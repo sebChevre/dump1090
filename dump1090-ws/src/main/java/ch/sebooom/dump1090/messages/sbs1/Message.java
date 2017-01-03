@@ -66,4 +66,8 @@ public class Message {
     public MessageType type() {
         return type;
     }
+
+    public String getFieldAt(int position){
+        return fields[position].getValue();
+    }
 }

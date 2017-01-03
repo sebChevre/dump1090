@@ -1,5 +1,7 @@
 package ch.sebooom.dump1090.tcp;
 
+import ch.sebooom.dump1090.messages.sbs1.Fields;
+import ch.sebooom.dump1090.messages.sbs1.ICAOIdent;
 import ch.sebooom.dump1090.messages.sbs1.Message;
 import ch.sebooom.dump1090.messages.sbs1.MessageType;
 import com.google.gson.JsonObject;
@@ -17,7 +19,7 @@ public class TCPStats {
 
     private final long totalTime;
     private HashMap<MessageType,AtomicInteger> messagesByType = new HashMap<>();
-    private HashMap<MessageType,AtomicInteger> messagesByPlane = new HashMap<>();
+    private HashMap<ICAOIdent,AtomicInteger> messagesByPlane = new HashMap<>();
     private long startTime;
     private long stopTime;
 
@@ -50,9 +52,13 @@ public class TCPStats {
         messages.forEach(message->{
             //add message type as map key if it didnt already exist
             messagesByType.putIfAbsent(message.type(), new AtomicInteger(0));
-            
+
+            messagesByPlane.putIfAbsent(new ICAOIdent(message.getFieldAt(Fields.ICAO_IDENT)),new AtomicInteger(0));
+
             //increment msg by type counter
             messagesByType.get(message.type()).incrementAndGet();
+
+            messagesByPlane.get(new ICAOIdent(message.getFieldAt(Fields.ICAO_IDENT))).incrementAndGet();
 
         });
 
@@ -62,6 +68,10 @@ public class TCPStats {
 
     public HashMap<MessageType, AtomicInteger> getMessagesByType() {
         return messagesByType;
+    }
+
+    public HashMap<ICAOIdent, AtomicInteger> getMessagesByPlane() {
+        return messagesByPlane;
     }
 
    

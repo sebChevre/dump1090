@@ -4,6 +4,7 @@ import com.rethinkdb.RethinkDB;
 import com.rethinkdb.gen.ast.Table;
 import com.rethinkdb.net.Connection;
 import com.rethinkdb.net.Cursor;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.Map;
@@ -18,6 +19,7 @@ public class RethonkDBTest {
     public static final RethinkDB r = RethinkDB.r;
 
 
+    @Ignore
     @Test
     public void test(){
         Connection connection = r.connection().hostname("localhost").port(28015).connect();
