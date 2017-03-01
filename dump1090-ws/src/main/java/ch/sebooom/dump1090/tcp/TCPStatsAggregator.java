@@ -1,5 +1,6 @@
 package ch.sebooom.dump1090.tcp;
 
+import ch.sebooom.dump1090.messages.sbs1.ICAOIdent;
 import ch.sebooom.dump1090.messages.sbs1.MessageType;
 
 import java.util.Date;
@@ -17,6 +18,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class TCPStatsAggregator {
 
     private HashMap<MessageType,AtomicInteger> messagesByType = new HashMap<>();
+    private HashMap<ICAOIdent,AtomicInteger> messagesByPlane = new HashMap<>();
     private AtomicInteger totalCount = new AtomicInteger();
     private String startAggregationDate = null;
     private String stopAggreagtionDate = null;
@@ -31,11 +33,9 @@ public class TCPStatsAggregator {
 
     private TCPStatsAggregator(List<Map> messages){
 
-
-        System.out.println("ok1:");
-
-
-        try{
+        //si éléments retournés
+        if(!messages.isEmpty()){
+            //calcul des plages de debut et fin des entites retournes
             Map rootStart = messages.get(0);
             Map timingStart = (Map)rootStart.get("timing");
             long startMillis = (long) timingStart.get("start_millis");
@@ -45,20 +45,14 @@ public class TCPStatsAggregator {
             Map timingStop = (Map)rootStop.get("timing");
             long stopMillis = (long) timingStop.get("stop_millis");
 
-            System.out.println("duration: " + (stopMillis - startMillis));
-
 
             totalPeriodDuration = getDurationAsHumanReadable(stopMillis - startMillis);
             startAggregationDate = new Date(startMillis).toString();
             stopAggreagtionDate = new Date(stopMillis).toString();
-
-            messages.stream().forEach(entity -> dealEntity(entity));
-        }catch (Exception e){
-            e.printStackTrace();
         }
 
 
-
+        messages.stream().forEach(this::dealEntity);
 
 
     }
@@ -74,12 +68,13 @@ public class TCPStatsAggregator {
     private void dealEntity(Map entity){
 
         Map msgs = (Map)entity.get("msgs");
+        //noinspection unchecked
         Map<String,Integer> msgByType = (Map<String,Integer>)msgs.get("byType");
 
         msgByType.keySet().forEach(msgType -> {
 
             MessageType type = MessageType.valueOf(msgType);
-            Integer messageOccurence = msgByType.get(msgType).intValue();
+            Integer messageOccurence = msgByType.get(msgType);
 
             //add message type as map key if it didnt already exist
             messagesByType.putIfAbsent(type, new AtomicInteger(0));
@@ -89,6 +84,24 @@ public class TCPStatsAggregator {
 
             totalCount.getAndAdd(messageOccurence);
         });
+
+        //noinspection unchecked
+        Map<String,Integer> msgByPlane = (Map<String,Integer>)msgs.get("byPlane");
+
+        msgByPlane.keySet().forEach(icaoIdent -> {
+
+            ICAOIdent icao = new ICAOIdent(icaoIdent);
+
+            Integer messageOccurence = msgByPlane.get(icao.icaoIdent());
+
+            //add message type as map key if it didnt already exist
+            messagesByPlane.putIfAbsent(icao, new AtomicInteger(0));
+
+            //increment msg by type counter
+            messagesByPlane.get(icao).addAndGet(messageOccurence);
+
+        });
+
 
     }
 }

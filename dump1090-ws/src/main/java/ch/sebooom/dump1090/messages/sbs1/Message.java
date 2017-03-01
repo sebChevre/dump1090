@@ -7,14 +7,22 @@ import java.util.Date;
 
 /**
  * High Level Message. Encapsulate SBS1 fields and type
+ *
  */
 public class Message {
 
 
-    private Field [] fields = new Field[22];
-    private MessageType type;
-    private long loggedTimeStamp;       //timestamp message from tcp
+    private Field [] fields = new Field[22];    //tableau des champs tcp
+    private MessageType type;                   //type de message
+    private long loggedTimeStamp;               //timestamp message from tcp
+    private String correlationId;
 
+    private static GsonBuilder gsonBuilder;
+
+    static{
+        gsonBuilder = new GsonBuilder();
+        gsonBuilder.registerTypeAdapter(Message.class, new JsonMessageAdapter());
+    }
 
     public static Message fromTCPString(String tcpString){
         Validate.notEmpty(tcpString); //null et pas vide
@@ -32,9 +40,10 @@ public class Message {
 
         String [] fields = tcpString.split(",",-1);
 
-        message.withType(MessageType.from(fields[0],fields[1]));
+        message
+            .withType(MessageType.from(fields[0],fields[1]))
+            .withFields(Fields.from(fields));
 
-        message.withFields(Fields.from(fields));
 
         return message;
     }
@@ -47,19 +56,26 @@ public class Message {
     }
 
     private Message withFields(Field [] messageFields){
-        this.fields = messageFields;
+        fields = messageFields;
+        this.correlationId = fields[Fields.ICAO_IDENT].getValue();
         return this;
+    }
+
+
+
+    public String getCorrelationId () {
+        return correlationId;
     }
 
     public Field[] getFields(){
         return fields;
     }
+
     public long getLoggedTimeStamp(){
         return loggedTimeStamp;
     }
+
     public String toJson(){
-        GsonBuilder gsonBuilder = new GsonBuilder();
-        gsonBuilder.registerTypeAdapter(Message.class, new JsonMessageAdapter());
         return gsonBuilder.create().toJson(this);
     }
 

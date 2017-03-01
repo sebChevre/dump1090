@@ -1,6 +1,8 @@
 package ch.sebooom.dump1090.tcp;
 
-import ch.sebooom.dump1090.RxBus;
+import ch.sebooom.dump1090.bus.RxBus;
+import ch.sebooom.dump1090.log.EventType;
+import ch.sebooom.dump1090.log.JsonLog;
 import ch.sebooom.dump1090.messages.sbs1.Message;
 
 import java.io.BufferedReader;
@@ -37,7 +39,10 @@ public class TCPListener {
                 BufferedReader in = new BufferedReader(new
                         InputStreamReader(skt.getInputStream()));
 
-                logger.info("TCP Listenning started [" + host +":" + port +"]");
+                logger.info(
+                    JsonLog.technical(
+                        String.format("TCP Listenning started [%s:%d]",host,port),
+                            EventType.TCP_LISTENNING,0));
 
 
                 while(running){
@@ -46,8 +51,12 @@ public class TCPListener {
 
                     String message = in.readLine();
                     Message msg = Message.fromTCPString(message);
-                    logger.fine("Received from dump1090: " + message);
-                    logger.fine("Send to bus: " + msg);
+                    logger.info(JsonLog.domain(
+                            String.format("Received from dump1090: %s",message),
+                            msg.getCorrelationId(), EventType.TCP_MESSAGE_RECEIVED));
+                    logger.fine(JsonLog.technical(
+                            String.format("Send to bus: %S",msg),
+                            EventType.TCP_LISTENNING,0));
                     bus.send(msg);
                 }
 
@@ -55,8 +64,11 @@ public class TCPListener {
             }
             catch(Exception e) {
                 e.printStackTrace();
-                logger.severe("Error during ch.sebooom.dump1090.tcptestserver.tcp dump1090 Listenning: " + e.getMessage());
-                logger.severe("System exiting now...");
+                logger.severe(JsonLog.technical(
+                        String.format("Error during ch.sebooom.dump1090.tcptestserver.tcp dump1090 Listenning: %S",e.getMessage()),
+                        EventType.TCP_LISTENNING,0));
+                logger.severe(JsonLog.technical(
+                        "System exiting now...",EventType.TCP_LISTENNING,0));
                 System.exit(1);
             }
 

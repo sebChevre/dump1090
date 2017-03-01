@@ -28,8 +28,8 @@ public class RethonkDBTest {
         //System.out.println(t.toString());
 
         Object t = table.insert(r.hashMap("test","ok")).run(connection);
-        Object t1 = table.insert(r.hashMap("test","ok")).run(connection);;
-        Object t2 = table.insert(r.hashMap("test"," pas ok")).run(connection);;
+        Object t1 = table.insert(r.hashMap("test","ok")).run(connection);
+        Object t2 = table.insert(r.hashMap("test"," pas ok")).run(connection);
         System.out.println(t.toString());
 
         Cursor c = table.filter(row -> row.g("test").eq("ok")).run(connection);

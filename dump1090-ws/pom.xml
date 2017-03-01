@@ -11,7 +11,7 @@
 
 
 	<artifactId>dump1090-ws</artifactId>
-	<version>1.0-SNAPSHOT</version>
+	<version>1.1</version>
 	<build>
 		<plugins>
 			<plugin>
@@ -28,7 +28,7 @@
 				<configuration>
 					<archive>
 						<manifest>
-							<mainClass>ch.sebooom.dump1090.Application</mainClass>
+							<mainClass>ch.sebooom.dump1090.main.Application</mainClass>
 						</manifest>
 					</archive>
 					<descriptorRefs>

@@ -12,13 +12,17 @@ public class TCPStatsServiceImpl implements TCPStatsService {
 	private TCPStatsRepository repository;
 
 
+
 	public TCPStatsServiceImpl(TCPStatsRepository repository) {
+
 		this.repository = repository;
 	}
 	
 	@Override
 	public void saveStats(TCPStats tcpStats) {
+
 		repository.save(tcpStats);
+
 		
 	}
 

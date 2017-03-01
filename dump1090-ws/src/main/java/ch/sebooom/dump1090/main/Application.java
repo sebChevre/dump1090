@@ -1,7 +1,10 @@
-package ch.sebooom.dump1090;
+package ch.sebooom.dump1090.main;
 
 
+import ch.sebooom.dump1090.bus.RxBus;
 import ch.sebooom.dump1090.http.Server;
+import ch.sebooom.dump1090.log.EventType;
+import ch.sebooom.dump1090.log.JsonLog;
 import ch.sebooom.dump1090.repository.TCPStatsRepository;
 import ch.sebooom.dump1090.repository.impl.TCPStatsMongoDBRepository;
 import ch.sebooom.dump1090.repository.impl.TCPStatsRethinkDBRepository;
@@ -9,20 +12,22 @@ import ch.sebooom.dump1090.service.TCPStatsService;
 import ch.sebooom.dump1090.service.impl.TCPStatsServiceImpl;
 import ch.sebooom.dump1090.tcp.TCPListener;
 import ch.sebooom.dump1090.tcp.TCPStatsGenerator;
+import ch.sebooom.dump1090.utils.Chrono;
 import ch.sebooom.dump1090.utils.Dump1090Properties;
-import org.apache.commons.cli.MissingArgumentException;
 
 import java.util.Properties;
 import java.util.concurrent.Executors;
 import java.util.logging.Logger;
 
 /**
- * Point d'entrée de l'application
+ * Démarre les différents composants de l'application:
+ *
  *
  */
 class Application {
 
     private final static Logger logger = Logger.getLogger(Application.class.getName());
+
     //Bus interne d'échange de données
     private static RxBus bus = new RxBus();
     private static Dump1090Properties properties;
@@ -30,15 +35,15 @@ class Application {
 
     public static void main(String[] args) {
 
-            parsePorperties();
+            getProperties();
 
         	TCPStatsService service = initService();
               
             startTCPListenning();
 
-            startTCPStats(service);
+            startTCPStatsGenerator(service);
 
-            startServer(service);
+            startWebServer(service);
 
     }
 
@@ -61,6 +66,10 @@ class Application {
         String dbType = props.getProperty("dump1090.dbtype");
         TCPStatsRepository impl = null;
 
+        Chrono repo = Chrono.start();
+        logger.info(JsonLog.technical("Init repository, dbType: " + dbType, EventType.REPOSITORY,0));
+
+
         switch (dbType){
 
             case "mongodb":
@@ -69,6 +78,7 @@ class Application {
                 String mongoDb = props.getProperty("mongodb.db");
                 String collection = props.getProperty("mongodb.collection");
                 impl = new TCPStatsMongoDBRepository(mongoDBHost, mongoPort, mongoDb, collection);
+                logger.info(JsonLog.technical("Repository initialized, mongodb",EventType.REPOSITORY,repo.stop()));
             break;
 
             case "rethinkdb":
@@ -77,6 +87,7 @@ class Application {
                 String rethinkDBdb = props.getProperty("rethinkdb.db");
                 String rethinkDBtable = props.getProperty("rethinkdb.table");
                 impl = new TCPStatsRethinkDBRepository(rethinkDBHost, rethinkDBport, rethinkDBdb, rethinkDBtable);
+                logger.info(JsonLog.technical("Repository initialized, rethinkdb",EventType.REPOSITORY,repo.stop()));
             break;
         }
 
@@ -84,12 +95,12 @@ class Application {
     }
 
     /**
-     * Démarage du service de statistique
+     * Démarage du service de génération de statistiques
      * @param service l'instance du service des stats
      */
-    private static void startTCPStats(TCPStatsService service) {
+    private static void startTCPStatsGenerator(TCPStatsService service) {
 
-        logger.info("Starting ch.sebooom.dump1090.tcptestserver.tcp stats...");
+        logger.info(JsonLog.technical("Starting tcpgenerator ...",EventType.STATS_GENERATION,0));
 
         Executors.newSingleThreadExecutor().execute(() -> 
         	TCPStatsGenerator.newInstance(service)
@@ -99,12 +110,12 @@ class Application {
 
     /**
      * Démarrage du serveur http
-     * @param service
+     * @param service le service injecté
      */
-    private static void startServer(TCPStatsService service) {
+    private static void startWebServer(TCPStatsService service) {
         int port = Integer.parseInt(properties.getProperties().getProperty("server.port"));
 
-        logger.info("Starting server on port: " + port);
+        logger.info(JsonLog.technical("Starting server on port: " + port,EventType.WEB_SERVER,0));
 
         Executors.newSingleThreadExecutor().execute(() -> Server.newInstance(service)
                 .withPort(port)
@@ -120,8 +131,8 @@ class Application {
         String tcpHost = properties.getProperties().getProperty("dump1090.tcp.host");
         int tcpPort = Integer.parseInt(properties.getProperties().getProperty("dump1090.tcp.port"));
 
-        logger.info("Starting listenning dump1090tcp server ["
-                + tcpHost + ":" + tcpPort + "]");
+        logger.info(JsonLog.technical("Starting listenning dump1090tcp server ["
+                + tcpHost + ":" + tcpPort + "]",EventType.TCP_LISTENNING,0));
 
         Executors.newSingleThreadExecutor().execute(() ->
                 new TCPListener(tcpPort, tcpHost, bus).start());
@@ -130,76 +141,23 @@ class Application {
 
 
     /**
-     * Validation des propriétés
-     * Si probléme, fin de l'application
+     * Récupération des propriétés
+     * Si problème, fin de l'application
      */
-    private static void parsePorperties() {
+    private static void getProperties() {
+
+        logger.info(JsonLog.technical("Parsing properties app...",EventType.PROPERTIES,0));
 
         try {
             properties = Dump1090Properties.get();
+            logger.info(JsonLog.technical("Properties app succesfully parsed",EventType.PROPERTIES,0));
 
         } catch (Exception e) {
-            logger.severe("Properties files problem: " + e.getMessage());
-            logger.severe("Application will exit now!");
+            logger.severe(JsonLog.technical("Properties files problem: " + e.getMessage(),EventType.PROPERTIES,0));
+            logger.severe(JsonLog.technical("Application will exit now!",EventType.PROPERTIES,0));
             System.exit(1);
         }
 
     }
-
-    /**
-     * Validation des propriétés applicative
-     * @throws MissingArgumentException levé si au moins une propriété manque
-     */
-   /* private static void checkMandatoryProperties() throws MissingArgumentException {
-        boolean propertiesMissing = false;
-
-        if(properties.get("server.port") == null){
-            logger.severe("Property [server.port] not found.");
-            propertiesMissing = true;
-        }
-
-        if(properties.get("dump1090.tcp.port") == null){
-            logger.severe("Property [dump1090.tcp.port] not found.");
-            propertiesMissing = true;
-        }
-
-        if(properties.get("dump1090.tcp.host") == null){
-            logger.severe("Property [dump1090.tcp.host] not found.");
-            propertiesMissing = true;
-        }
-
-        if(properties.get("dump1090.dbtype") == null){
-            logger.severe("Property [dump1090.dbtype] not found.");
-            propertiesMissing = true;
-        }
-
-
-        if(properties.get("rethinkdb.host") == null){
-            logger.severe("Property [rethinkdb.host] not found.");
-            propertiesMissing = true;
-        }
-        
-        if(properties.get("rethinkdb.port") == null){
-            logger.severe("Property [rethinkdb.port] not found.");
-            propertiesMissing = true;
-        }
-        
-        if(properties.get("rethinkdb.db") == null){
-            logger.severe("Property [rethinkdb.db] not found.");
-            propertiesMissing = true;
-        }
-
-        if(properties.get("rethinkdb.table") == null){
-            logger.severe("Property [rethinkdb.table] not found.");
-            propertiesMissing = true;
-        }
-
-        if(propertiesMissing){
-            logger.severe("At least one mandatory properties missing");
-            throw new MissingArgumentException("At least one properties missing, check log");
-        }
-        
-        
-    }*/
 
 }

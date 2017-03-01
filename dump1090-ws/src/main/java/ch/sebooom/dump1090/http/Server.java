@@ -1,7 +1,9 @@
 package ch.sebooom.dump1090.http;
 
+import ch.sebooom.dump1090.bus.RxBus;
+import ch.sebooom.dump1090.log.EventType;
+import ch.sebooom.dump1090.log.JsonLog;
 import ch.sebooom.dump1090.messages.JsonTransformer;
-import ch.sebooom.dump1090.RxBus;
 import ch.sebooom.dump1090.messages.TestMessage;
 import ch.sebooom.dump1090.service.TCPStatsService;
 
@@ -34,21 +36,38 @@ public class Server {
 
         webSocket(HttpPaths.WS_ENDPOINT.path,new Dump1090WebSocketHandler(bus));
 
-        enableCORS("Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
+        enableCORS();
 
         get(HttpPaths.REST_TEST.path, (request,response) -> {
-            logger.info("/test request ok");
+
+            logger.info(
+                    JsonLog.technical(
+                            String.format("GET/ %s complete",HttpPaths.REST_TEST.path),
+                            EventType.REST_GET_TEST,0)
+            );
+
             return new TestMessage();
+
+
         }, new JsonTransformer());
 
         get(HttpPaths.REST_STATS_LAST.path, (request, response) -> {
-        	
+            logger.info(
+                    JsonLog.technical(
+                            String.format("GET/ %s complete",HttpPaths.REST_STATS_LAST.path),
+                            EventType.REST_GET,0)
+            );
         	return statsService.findLastStats();
         	
         }, new JsonTransformer());
         
         get(HttpPaths.REST_STATS_PERIOD.path, (request, response) -> {
-        	
+            logger.info(
+                    JsonLog.technical(
+                            String.format("GET/ %s complete",HttpPaths.REST_STATS_PERIOD.path),
+                            EventType.REST_GET,0)
+            );
+
         	Long start = Long.valueOf(request.params("from"));
         	Long stop = Long.valueOf(request.params("to"));
         	
@@ -58,7 +77,9 @@ public class Server {
 
         init();
 
-        logger.info("Server started on port :" + port);
+        logger.info(JsonLog.technical(
+                String.format("Server started on port : %d",port),
+                EventType.WEB_SERVER,0));
     }
 
 
@@ -75,7 +96,7 @@ public class Server {
     /**
      * Enable CORS request for all rest endpoint
      */
-    private static void enableCORS(final String headers) {
+    private static void enableCORS() {
 
         options("/*", (request, response) -> {
 

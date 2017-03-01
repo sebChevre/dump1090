@@ -1,5 +1,7 @@
 package ch.sebooom.dump1090.repository.impl;
 
+import ch.sebooom.dump1090.log.EventType;
+import ch.sebooom.dump1090.log.JsonLog;
 import ch.sebooom.dump1090.messages.sbs1.MessageType;
 import ch.sebooom.dump1090.repository.TCPStatsRepository;
 import ch.sebooom.dump1090.tcp.TCPStats;
@@ -14,6 +16,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Logger;
 
 public class TCPStatsRethinkDBRepository implements TCPStatsRepository{
 
@@ -21,10 +24,15 @@ public class TCPStatsRethinkDBRepository implements TCPStatsRepository{
 	private Connection rethinkDbConnection;
 	private  Table statsTable;
 	private static final String STATS_TABLE_NAME = "test3";
-	
+	private final static Logger logger = Logger.getLogger(TCPStatsRethinkDBRepository.class.getName());
+
+
 	public TCPStatsRethinkDBRepository(String rethinkDBHost, int port, String db, String table) {
 		rethinkDbConnection = r.connection().hostname("localhost").port(28015).connect();
 		statsTable = r.db(db).table(table);
+		logger.info(JsonLog.technical(
+				String.format("RethonkDBRepository initialized: %s",rethinkDbConnection.toString()),
+				EventType.REPOSITORY,0));
 	}
 
 	@Override
@@ -61,7 +69,7 @@ public class TCPStatsRethinkDBRepository implements TCPStatsRepository{
         
         
         return  new MapObject().with("msgs",new MapObject().with("byType",msgs)
-        		.with("total",tcpStats.getTotalCount()))
+        		.with("total",tcpStats.getTotalMsgsCount()))
         		.with("timing", new MapObject()
         				.with("duration",tcpStats.getTotalTime())
         				.with("start",start)

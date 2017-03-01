@@ -20,6 +20,11 @@ public class ICAOIdent {
     }
 
     @Override
+    public String toString() {
+        return hexIdent;
+    }
+
+    @Override
     public boolean equals(Object o) {
 
         if (o == null)

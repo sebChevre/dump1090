@@ -7,7 +7,6 @@ import ch.sebooom.dump1090.messages.sbs1.MessageType;
 import com.google.gson.JsonObject;
 
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -17,7 +16,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class TCPStats {
 
-    private final long totalTime;
+    private long totalTime;
     private HashMap<MessageType,AtomicInteger> messagesByType = new HashMap<>();
     private HashMap<ICAOIdent,AtomicInteger> messagesByPlane = new HashMap<>();
     private long startTime;
@@ -36,31 +35,35 @@ public class TCPStats {
 
     private TCPStats(List<Message> messages){
 
-        Collections.sort(messages, new Comparator<Message>(){
-            public int compare(Message p1, Message p2){
-                return ((Long)p1.getLoggedTimeStamp())
-                        .compareTo(((Long)p2.getLoggedTimeStamp()));
-            }
-        });
+        //si il y des messages
+        if(!messages.isEmpty()){
 
-        
+            //tri par date d'entrée (logtimestamp)
+            Collections.sort(messages, (p1, p2) -> ((Long)p1.getLoggedTimeStamp())
+                    .compareTo(((Long)p2.getLoggedTimeStamp())));
 
-        startTime = messages.get(0).getLoggedTimeStamp();
-        stopTime = messages.get(messages.size()-1).getLoggedTimeStamp();
-        totalTime = stopTime-startTime;
-        
-        messages.forEach(message->{
-            //add message type as map key if it didnt already exist
-            messagesByType.putIfAbsent(message.type(), new AtomicInteger(0));
+            //défintion des dates de debut, fin et total
+            startTime = messages.get(0).getLoggedTimeStamp();
+            stopTime = messages.get(messages.size()-1).getLoggedTimeStamp();
+            totalTime = stopTime-startTime;
 
-            messagesByPlane.putIfAbsent(new ICAOIdent(message.getFieldAt(Fields.ICAO_IDENT)),new AtomicInteger(0));
+            messages.forEach(message->{
+                //add message type as map key if it didnt already exist
+                messagesByType.putIfAbsent(message.type(), new AtomicInteger(0));
+                //increment msg by type counter
+                messagesByType.get(message.type()).incrementAndGet();
 
-            //increment msg by type counter
-            messagesByType.get(message.type()).incrementAndGet();
+                //si hexident présent
+                if(!message.getFieldAt(Fields.ICAO_IDENT).isEmpty()) {
+                    messagesByPlane.putIfAbsent(new ICAOIdent(message.getFieldAt(Fields.ICAO_IDENT)),new AtomicInteger(0));
 
-            messagesByPlane.get(new ICAOIdent(message.getFieldAt(Fields.ICAO_IDENT))).incrementAndGet();
+                    messagesByPlane.get(new ICAOIdent(message.getFieldAt(Fields.ICAO_IDENT))).incrementAndGet();
+                }
 
-        });
+
+            });
+        }
+
 
     }
 
@@ -80,10 +83,19 @@ public class TCPStats {
      * Return total messages count
      * @return the total number of messages
      */
-    public int getTotalCount() {
+    public int getTotalMsgsCount() {
         return messagesByType.values().stream()
                 .mapToInt(AtomicInteger::intValue).sum();
     }
+
+    /**
+     * Return total planes count
+     * @return the total number of messages
+     */
+    public int getTotalPlanesCount() {
+        return messagesByPlane.keySet().size();
+    }
+
 
     public long getTotalTime() {
 		return totalTime;

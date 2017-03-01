@@ -1,11 +1,15 @@
 package ch.sebooom.dump1090.utils;
 
+import ch.sebooom.dump1090.log.EventType;
+import ch.sebooom.dump1090.log.JsonLog;
 import org.apache.commons.cli.MissingArgumentException;
 
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Properties;
 import java.util.logging.Logger;
+
+import static ch.sebooom.dump1090.utils.PropertiesKey.*;
 
 /**
  * Created by seb on .
@@ -15,7 +19,7 @@ import java.util.logging.Logger;
 public class Dump1090Properties {
 
     private Properties properties = new Properties();
-    private static String propertiesPath = "./config/application.properties";
+    public final static String propertiesPath = "./config/application.properties";
     private final static Logger logger = Logger.getLogger(Dump1090Properties.class.getName());
 
     public static Dump1090Properties get() throws Dump1090PropertiesException {
@@ -37,49 +41,49 @@ public class Dump1090Properties {
 
         boolean propertiesMissing = false;
 
-        String dbType = properties.getProperty("dump1090.dbtype");
+        String dbType = properties.getProperty(DB_TYPE.key());
 
         switch (dbType){
             case "mongodb":
-                if(properties.get("mongodb.host") == null){
-                    logger.severe("Property [mongodb.host] not found.");
+                if(properties.get(MONGODB_HOST.key()) == null){
+                    logMissingProperties(MONGODB_HOST);
                     propertiesMissing = true;
                 }
 
-                if(properties.get("mongodb.port") == null){
-                    logger.severe("Property [mongodb.port] not found.");
+                if(properties.get(MONGODB_PORT.key()) == null){
+                    logMissingProperties(MONGODB_PORT);
                     propertiesMissing = true;
                 }
 
-                if(properties.get("mongodb.db") == null){
-                    logger.severe("Property [mongodb.db] not found.");
+                if(properties.get(MONGODB_DB.key()) == null){
+                    logMissingProperties(MONGODB_DB);
                     propertiesMissing = true;
                 }
 
-                if(properties.get("mongodb.collection") == null){
-                    logger.severe("Property [mongodb.collection] not found.");
+                if(properties.get(MONGODB_COLLECTION.key()) == null){
+                    logMissingProperties(MONGODB_COLLECTION);
                     propertiesMissing = true;
                 }
             break;
 
             case "rethinkdb":
-                if(properties.get("rethinkdb.host") == null){
-                    logger.severe("Property [rethinkdb.host] not found.");
+                if(properties.get(RETHINKDB_HOST.key()) == null){
+                    logMissingProperties(RETHINKDB_HOST);
                     propertiesMissing = true;
                 }
 
-                if(properties.get("rethinkdb.port") == null){
-                    logger.severe("Property [rethinkdb.port] not found.");
+                if(properties.get(RETHINKDB_PORT.key()) == null){
+                    logMissingProperties(RETHINKDB_PORT);
                     propertiesMissing = true;
                 }
 
-                if(properties.get("rethinkdb.db") == null){
-                    logger.severe("Property [rethinkdb.db] not found.");
+                if(properties.get(RETHINKDB_DB.key()) == null){
+                    logMissingProperties(RETHINKDB_DB);
                     propertiesMissing = true;
                 }
 
-                if(properties.get("rethinkdb.table") == null){
-                    logger.severe("Property [rethinkdb.table] not found.");
+                if(properties.get(RETHINKDB_TABLE.key()) == null){
+                    logMissingProperties(RETHINKDB_TABLE);
                     propertiesMissing = true;
                 }
 
@@ -87,41 +91,51 @@ public class Dump1090Properties {
 
             default:
                 throw new Dump1090PropertiesException(
-                        String.format("dump1090.dbtype properts erroneus: %s",dbType));
+                        String.format("dump1090.dbtype properties erroneus: %s",dbType));
         }
 
         if(propertiesMissing){
-            logger.severe("At least one mandatory properties missing");
+            logger.severe(JsonLog.technical(
+                "At least one mandatory properties missing",
+                    EventType.PROPERTIES,0));
             throw new MissingArgumentException("At least one properties missing, check log");
         }
+    }
+
+    private void logMissingProperties(PropertiesKey key) {
+        logger.severe(JsonLog.technical(
+                String.format("Property [%s] not found.",key.key()),
+                EventType.PROPERTIES,0));
     }
 
     private void checkMandatory() throws MissingArgumentException {
 
         boolean propertiesMissing = false;
 
-        if(properties.get("server.port") == null){
-            logger.severe("Property [server.port] not found.");
+        if(properties.get(SERVER_PORT.key()) == null){
+            logMissingProperties(SERVER_PORT);
             propertiesMissing = true;
         }
 
-        if(properties.get("dump1090.tcp.port") == null){
-            logger.severe("Property [dump1090.tcp.port] not found.");
+        if(properties.get(DUMP1090TCP_PORT.key()) == null){
+            logMissingProperties(DUMP1090TCP_PORT);
             propertiesMissing = true;
         }
 
-        if(properties.get("dump1090.tcp.host") == null){
-            logger.severe("Property [dump1090.tcp.host] not found.");
+        if(properties.get(DUMP1090TCP_HOST.key()) == null){
+            logMissingProperties(DUMP1090TCP_HOST);
             propertiesMissing = true;
         }
 
-        if(properties.get("dump1090.dbtype") == null){
-            logger.severe("Property [dump1090.dbtype] not found.");
+        if(properties.get(DB_TYPE.key()) == null){
+            logMissingProperties(DB_TYPE);
             propertiesMissing = true;
         }
 
         if(propertiesMissing){
-            logger.severe("At least one mandatory properties missing");
+            logger.severe(JsonLog.technical(
+                    "At least one mandatory properties missing",
+                    EventType.PROPERTIES,0));
             throw new MissingArgumentException("At least one mandatory properties missing, check log");
         }
     }
