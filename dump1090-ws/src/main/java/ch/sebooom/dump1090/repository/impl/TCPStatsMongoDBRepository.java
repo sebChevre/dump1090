@@ -35,25 +35,29 @@ public class TCPStatsMongoDBRepository implements TCPStatsRepository{
         MongoClient mongoClient = new MongoClient(new MongoClientURI(connectionString));
         MongoDatabase database = mongoClient.getDatabase(db);
         collection = database.getCollection(mongoCollection);
-        logger.info(JsonLog.technical(String.format("MongoDBRepository initialized: %s",connectionString),
-                EventType.REPOSITORY,0));
+        logger.info(JsonLog.log(String.format("MongoDBRepository initialized: %s",connectionString),
+                EventType.REPOSITORY,JsonLog.EMPTY_CORRELATION_ID));
     }
 
     @Override
     public void save(TCPStats tcpStats) {
 
         Chrono c = Chrono.start();
-        logger.info(JsonLog.technical(
+        logger.info(JsonLog.log(
                 String.format("Saving stats"),
-                EventType.STATS_SAVING,0))
-        ;
+                EventType.STATS_SAVING,
+                String.valueOf(tcpStats.getStartTime()))
+        );
+
 
         collection.insertOne(getDocumentObject(tcpStats));
 
-        logger.info(JsonLog.technical(
+        logger.info(JsonLog.log(
                 String.format("Stats saved sucessfully:%s",tcpStats),
-                EventType.STATS_SAVING,c.stop()))
-        ;
+                EventType.STATS_SAVING,
+                String.valueOf(c.stop()))
+        );
+
     }
 
     @Override
@@ -61,9 +65,10 @@ public class TCPStatsMongoDBRepository implements TCPStatsRepository{
 
         Chrono c = Chrono.start();
 
-        logger.info(JsonLog.technical(
+        logger.info(JsonLog.log(
                 "Finding last stats",
-                EventType.STATS_FIND_LAST,0))
+                EventType.STATS_FIND_LAST,
+                String.valueOf(0)))
         ;
 
         List<Document> foundDocument = collection.find().into(new ArrayList<>());
@@ -73,10 +78,12 @@ public class TCPStatsMongoDBRepository implements TCPStatsRepository{
 
         Map returnMap = convertBSONToMap(docs.get(0));
 
-        logger.info(JsonLog.technical(
+        logger.info(JsonLog.log(
                 "Last stats find",
-                EventType.STATS_FIND_LAST,c.stop()))
-        ;
+                EventType.STATS_FIND_LAST,
+                String.valueOf(c.stop()))
+        );
+
 
         return returnMap;
     }
@@ -92,10 +99,12 @@ public class TCPStatsMongoDBRepository implements TCPStatsRepository{
     public List<Map> findByStartAndStopDate(Long start, Long stop) {
 
         Chrono c = Chrono.start();
-        logger.info(JsonLog.technical(
+        logger.info(JsonLog.log(
                 String.format("Finding period stats [%d - %d]",start,stop),
-                EventType.STATS_FIND_PERIOD,0))
-        ;
+                EventType.STATS_FIND_PERIOD,
+                String.valueOf(0))
+        );
+
 
         List<Map> returnList = new ArrayList<>();
 
@@ -111,10 +120,12 @@ public class TCPStatsMongoDBRepository implements TCPStatsRepository{
             returnList.add(m);
         });
 
-        logger.info(JsonLog.technical(
+        logger.info(JsonLog.log(
                 String.format("Find period stats [%d - %d]",start,stop),
-                EventType.STATS_FIND_PERIOD,c.stop()))
-        ;
+                EventType.STATS_FIND_PERIOD,
+                String.valueOf(c.stop()))
+        );
+
 
 
 

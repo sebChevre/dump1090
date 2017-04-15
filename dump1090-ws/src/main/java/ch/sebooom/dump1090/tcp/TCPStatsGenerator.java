@@ -35,43 +35,59 @@ public class TCPStatsGenerator {
 
     public void start(){
 
-        logger.info(JsonLog.technical("TCP Stats generator started",EventType.STATS_GENERATION,0));
+        logger.info(JsonLog.log(
+                "TCP Stats generator started",
+                EventType.TCP_AGREGATOR_PROCESS_STARTED,
+                JsonLog.EMPTY_CORRELATION_ID));
 
 
         //error handler
         Action1<Throwable> errrorHandler = throwable ->
 
-                logger.severe(JsonLog.technical(
-                        String.format("Error during stream processing for statsGenerator stats: %s", throwable.getMessage())
-                ,EventType.STATS_GENERATION,0));
+                logger.severe(JsonLog.log(
+                        String.format("Error during stream processing for statsGenerator stats: %s", throwable.getMessage()),
+                        EventType.MESSAGES_STATS_AGGREGATIONING,
+                        JsonLog.EMPTY_CORRELATION_ID)
+                );
 
         //complete handler
         Action0 completeHandler = () ->
-                logger.severe(JsonLog.technical("Stream complete. This wouldnt happend",EventType.STATS_GENERATION,0));
+                logger.severe(JsonLog.log(
+                        "Stream complete. This wouldnt happend",
+                        EventType.MESSAGES_STATS_AGGREGATIONING,
+                        JsonLog.EMPTY_CORRELATION_ID));
 
         //Traietement des messages venat du bus (flux tcp)
         bus.toObserverable()
                 .buffer(1, TimeUnit.MINUTES)            //toutes les minutes
                 .map(TCPStats::from)                    //instanciation d'un objet TCPStats
                 .subscribe(next -> {
-
-
-
                     int count = next.getTotalMsgsCount();   //total pour log
-                   
-                    logger.info(JsonLog.domain(String.format("%d messages received in last seconds",count),
-                            String.valueOf(next.getStartTime()),
-                            EventType.MESSAGES_STATS_AGGREGATION));
-                    logger.fine(JsonLog.technical("Stats:" + next.toJson(),EventType.STATS_GENERATION,0));
+
+
+                    logger.info(JsonLog.log(
+                            String.format("%d messages received in last seconds",count),
+                            EventType.MESSAGE_STATS_AGGREGATED,
+                            String.valueOf(next.getStartTime())));//correlation id startime
+                    logger.info(JsonLog.log(
+                            String.format("Stats generated: %s", next.toJson()),
+                            EventType.MESSAGE_STATS_AGGREGATED,
+                            String.valueOf(next.getStartTime()))
+                    );
+
+                    logger.info(JsonLog.log(
+                            String.format("Stats saving: %s", next.toJson()),
+                            EventType.MESSAGE_STATS_SAVING,
+                            String.valueOf(next.getStartTime()))
+                    );
 
                     tcpStatsService.saveStats(next);    //persistance db
 
-                    logger.info(JsonLog.domain(
-                            String.format("Stats generated: %s",next.toJson()),
-                            String.valueOf(next.getStartTime()), EventType.TCP_MESSAGE_RECEIVED)
+                    logger.info(JsonLog.log(
+                            String.format("Stats saving: %s", next.toJson()),
+                            EventType.MESSAGE_STATS_SAVED,
+                            String.valueOf(next.getStartTime()))
                     );
-
-
 
                 }, errrorHandler, completeHandler);
     }

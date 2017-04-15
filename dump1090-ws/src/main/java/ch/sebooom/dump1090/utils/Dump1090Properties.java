@@ -95,17 +95,19 @@ public class Dump1090Properties {
         }
 
         if(propertiesMissing){
-            logger.severe(JsonLog.technical(
+            logger.severe(JsonLog.log(
                 "At least one mandatory properties missing",
-                    EventType.PROPERTIES,0));
+                    EventType.PROPERTIES,
+                    String.valueOf(0)));
             throw new MissingArgumentException("At least one properties missing, check log");
         }
     }
 
     private void logMissingProperties(PropertiesKey key) {
-        logger.severe(JsonLog.technical(
+        logger.severe(JsonLog.log(
                 String.format("Property [%s] not found.",key.key()),
-                EventType.PROPERTIES,0));
+                EventType.PROPERTIES,
+                String.valueOf(0)));
     }
 
     private void checkMandatory() throws MissingArgumentException {
@@ -133,9 +135,10 @@ public class Dump1090Properties {
         }
 
         if(propertiesMissing){
-            logger.severe(JsonLog.technical(
+            logger.severe(JsonLog.log(
                     "At least one mandatory properties missing",
-                    EventType.PROPERTIES,0));
+                    EventType.PROPERTIES,
+                    String.valueOf(0)));
             throw new MissingArgumentException("At least one mandatory properties missing, check log");
         }
     }

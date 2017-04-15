@@ -20,7 +20,7 @@ public class JsonLogAdapter implements JsonSerializer<LogRecord>{
         JsonLog log = gsonBuilder.create().fromJson(logRecord.getMessage(), JsonLog.class);
 
         obj.addProperty("eventType",log.eventType.toString());
-        obj.addProperty("duration",log.durationTime);
+        obj.addProperty("logTime",log.logTime);
 
         obj.addProperty("correlationId",log.correlationId);
         obj.addProperty("msg",log.msg);
@@ -29,6 +29,7 @@ public class JsonLogAdapter implements JsonSerializer<LogRecord>{
         obj.addProperty("time",logRecord.getMillis());
         obj.addProperty("sourceClass",logRecord.getSourceClassName());
         obj.addProperty("threadId",logRecord.getThreadID());
+        obj.addProperty("threadName",log.threadName);
         return obj;
     }
 }

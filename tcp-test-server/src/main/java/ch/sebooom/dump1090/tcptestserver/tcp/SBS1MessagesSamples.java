@@ -10,8 +10,12 @@ import java.util.Random;
 class SBS1MessagesSamples {
 
     static List<String> messages = new ArrayList<>();
+    static List<String> erroneusMessages = new ArrayList<>();
+
 
     static{
+
+        erroneusMessages.add("MSG,3,,,,32,32,,");
         messages.add("MSG,5,,,3CEFF1,,,,,,,18000,,,,,,,,,,");
         messages.add("MSG,8,,,4BB843,,,,,,,,,,,,,,,,,");
         messages.add("MSG,4,,,4010E9,,,,,,,,396,174,,,-960,,0,0,0,0");
@@ -54,6 +58,12 @@ class SBS1MessagesSamples {
 
         return messages.get(new Random().nextInt(messages.size()-1)) + "\r\n";
     }
+
+    static String getRandomErroneusMsg(){
+
+        return erroneusMessages.get(0) + "\r\n";
+    }
+
 
 
 }

@@ -67,7 +67,10 @@ class Application {
         TCPStatsRepository impl = null;
 
         Chrono repo = Chrono.start();
-        logger.info(JsonLog.technical("Init repository, dbType: " + dbType, EventType.REPOSITORY,0));
+        logger.info(JsonLog.log("Init repository, dbType: " + dbType,
+                EventType.REPOSITORY,
+                String.valueOf(0))
+        );
 
 
         switch (dbType){
@@ -78,7 +81,11 @@ class Application {
                 String mongoDb = props.getProperty("mongodb.db");
                 String collection = props.getProperty("mongodb.collection");
                 impl = new TCPStatsMongoDBRepository(mongoDBHost, mongoPort, mongoDb, collection);
-                logger.info(JsonLog.technical("Repository initialized, mongodb",EventType.REPOSITORY,repo.stop()));
+                logger.info(JsonLog.log(
+                        "Repository initialized, mongodb",
+                        EventType.REPOSITORY,
+                        String.valueOf(repo.stop())))
+                ;
             break;
 
             case "rethinkdb":
@@ -87,7 +94,11 @@ class Application {
                 String rethinkDBdb = props.getProperty("rethinkdb.db");
                 String rethinkDBtable = props.getProperty("rethinkdb.table");
                 impl = new TCPStatsRethinkDBRepository(rethinkDBHost, rethinkDBport, rethinkDBdb, rethinkDBtable);
-                logger.info(JsonLog.technical("Repository initialized, rethinkdb",EventType.REPOSITORY,repo.stop()));
+                logger.info(JsonLog.log(
+                        "Repository initialized, rethinkdb",
+                        EventType.REPOSITORY,
+                        String.valueOf(repo.stop()))
+                );
             break;
         }
 
@@ -100,7 +111,10 @@ class Application {
      */
     private static void startTCPStatsGenerator(TCPStatsService service) {
 
-        logger.info(JsonLog.technical("Starting tcpgenerator ...",EventType.STATS_GENERATION,0));
+        logger.info(JsonLog.log(
+                "Starting tcpgenerator ...",EventType.STATS_GENERATION,
+                String.valueOf(0))
+        );
 
         Executors.newSingleThreadExecutor().execute(() -> 
         	TCPStatsGenerator.newInstance(service)
@@ -115,7 +129,11 @@ class Application {
     private static void startWebServer(TCPStatsService service) {
         int port = Integer.parseInt(properties.getProperties().getProperty("server.port"));
 
-        logger.info(JsonLog.technical("Starting server on port: " + port,EventType.WEB_SERVER,0));
+        logger.info(JsonLog.log(
+                "Starting server on port: " + port,
+                EventType.WEB_SERVER,
+                String.valueOf(0))
+        );
 
         Executors.newSingleThreadExecutor().execute(() -> Server.newInstance(service)
                 .withPort(port)
@@ -131,11 +149,17 @@ class Application {
         String tcpHost = properties.getProperties().getProperty("dump1090.tcp.host");
         int tcpPort = Integer.parseInt(properties.getProperties().getProperty("dump1090.tcp.port"));
 
-        logger.info(JsonLog.technical("Starting listenning dump1090tcp server ["
-                + tcpHost + ":" + tcpPort + "]",EventType.TCP_LISTENNING,0));
+        logger.info(JsonLog.log(
+                "Starting listenning dump1090tcp server ["
+                + tcpHost + ":" + tcpPort + "]",
+                EventType.TCP_LISTENNING,
+                String.valueOf(0))
+        );
 
         Executors.newSingleThreadExecutor().execute(() ->
                 new TCPListener(tcpPort, tcpHost, bus).start());
+
+
 
     }
 
@@ -146,15 +170,25 @@ class Application {
      */
     private static void getProperties() {
 
-        logger.info(JsonLog.technical("Parsing properties app...",EventType.PROPERTIES,0));
+        logger.info(JsonLog.log("Parsing properties app...",
+                EventType.PROPERTIES,
+                String.valueOf(0)));
 
         try {
             properties = Dump1090Properties.get();
-            logger.info(JsonLog.technical("Properties app succesfully parsed",EventType.PROPERTIES,0));
+            logger.info(JsonLog.log("Properties app succesfully parsed",
+                    EventType.PROPERTIES,
+                    String.valueOf(0)));
 
         } catch (Exception e) {
-            logger.severe(JsonLog.technical("Properties files problem: " + e.getMessage(),EventType.PROPERTIES,0));
-            logger.severe(JsonLog.technical("Application will exit now!",EventType.PROPERTIES,0));
+            logger.severe(JsonLog.log(
+                    "Properties files problem: " + e.getMessage(),
+                    EventType.PROPERTIES,
+                    String.valueOf(0)));
+            logger.severe(JsonLog.log(
+                    "Application will exit now!",
+                    EventType.PROPERTIES,
+                    String.valueOf(0)));
             System.exit(1);
         }
 

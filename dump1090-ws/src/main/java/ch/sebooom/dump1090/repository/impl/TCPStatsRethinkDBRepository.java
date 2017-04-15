@@ -30,9 +30,10 @@ public class TCPStatsRethinkDBRepository implements TCPStatsRepository{
 	public TCPStatsRethinkDBRepository(String rethinkDBHost, int port, String db, String table) {
 		rethinkDbConnection = r.connection().hostname("localhost").port(28015).connect();
 		statsTable = r.db(db).table(table);
-		logger.info(JsonLog.technical(
+		logger.info(JsonLog.log(
 				String.format("RethonkDBRepository initialized: %s",rethinkDbConnection.toString()),
-				EventType.REPOSITORY,0));
+				EventType.REPOSITORY,
+				JsonLog.EMPTY_CORRELATION_ID));
 	}
 
 	@Override

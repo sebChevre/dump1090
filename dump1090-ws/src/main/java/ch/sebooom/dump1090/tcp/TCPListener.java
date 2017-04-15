@@ -6,6 +6,7 @@ import ch.sebooom.dump1090.log.JsonLog;
 import ch.sebooom.dump1090.messages.sbs1.Message;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.util.logging.Logger;
@@ -40,39 +41,63 @@ public class TCPListener {
                         InputStreamReader(skt.getInputStream()));
 
                 logger.info(
-                    JsonLog.technical(
+                    JsonLog.log(
                         String.format("TCP Listenning started [%s:%d]",host,port),
-                            EventType.TCP_LISTENNING,0));
+                            EventType.TCP_LISTENNING_PROCESS_STARTED,JsonLog.EMPTY_CORRELATION_ID)
+                );
 
 
                 while(running){
 
+                    String message = null;
+
                     while (!in.ready()) {}
 
-                    String message = in.readLine();
+                    message = in.readLine();
+
+                    logger.info(JsonLog.log(
+                            String.format("TCP String reveived [%s], trying to parse...",message),
+                            EventType.TCP_MESSAGE_RECEIVED,
+                            JsonLog.EMPTY_CORRELATION_ID)
+                    );
+
+                    //parse message
                     Message msg = Message.fromTCPString(message);
-                    logger.info(JsonLog.domain(
-                            String.format("Received from dump1090: %s",message),
-                            msg.getCorrelationId(), EventType.TCP_MESSAGE_RECEIVED));
-                    logger.fine(JsonLog.technical(
-                            String.format("Send to bus: %S",msg),
-                            EventType.TCP_LISTENNING,0));
-                    bus.send(msg);
+
+                    //si parse ok
+                    if(null != msg){
+                        logger.info(JsonLog.log(
+                                String.format("TCP String parsed: %s",message),
+                                EventType.TCP_MESSAGE_PARSED,
+                                msg.getCorrelationId()));
+
+                        logger.fine(JsonLog.log(
+                                String.format("Send to bus: %S",msg),
+                                EventType.INTERNAL_BUS_SENDING,
+                                msg.getCorrelationId()));
+                        bus.send(msg);
+                    }
+
+
                 }
 
 
-            }
-            catch(Exception e) {
-                e.printStackTrace();
-                logger.severe(JsonLog.technical(
-                        String.format("Error during ch.sebooom.dump1090.tcptestserver.tcp dump1090 Listenning: %S",e.getMessage()),
-                        EventType.TCP_LISTENNING,0));
-                logger.severe(JsonLog.technical(
-                        "System exiting now...",EventType.TCP_LISTENNING,0));
+            }catch (IOException ioex){
+                ioex.printStackTrace();
+                logger.severe(JsonLog.log(
+                        String.format("Error during dump1090 Listenning: %S",ioex.getMessage()),
+                        EventType.TCP_LISTENNING,
+                        JsonLog.EMPTY_CORRELATION_ID)
+                );
+                logger.severe(JsonLog.log(
+                        "System exiting now...",
+                        EventType.SYSTEM_EXIT,
+                        JsonLog.EMPTY_CORRELATION_ID));
                 System.exit(1);
             }
 
     }
+
 
 
 }

@@ -19,9 +19,10 @@ public class RxBus {
     private final Subject<Message, Message> bus = new SerializedSubject<>(PublishSubject.create());
 
     public void send(Message message) {
-        logger.fine(JsonLog.technical(
+        logger.fine(JsonLog.log(
                 String.format("Send to bus: %s",message),
-                EventType.INTERNAL_BUS,0)
+                EventType.INTERNAL_BUS,
+                message.getCorrelationId())
         );
         bus.onNext(message);
     }

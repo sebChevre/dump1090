@@ -41,9 +41,9 @@ public class Server {
         get(HttpPaths.REST_TEST.path, (request,response) -> {
 
             logger.info(
-                    JsonLog.technical(
+                    JsonLog.log(
                             String.format("GET/ %s complete",HttpPaths.REST_TEST.path),
-                            EventType.REST_GET_TEST,0)
+                            EventType.REST_GET_TEST,String.valueOf(0))
             );
 
             return new TestMessage();
@@ -53,9 +53,9 @@ public class Server {
 
         get(HttpPaths.REST_STATS_LAST.path, (request, response) -> {
             logger.info(
-                    JsonLog.technical(
+                    JsonLog.log(
                             String.format("GET/ %s complete",HttpPaths.REST_STATS_LAST.path),
-                            EventType.REST_GET,0)
+                            EventType.REST_GET,String.valueOf(0))
             );
         	return statsService.findLastStats();
         	
@@ -63,9 +63,9 @@ public class Server {
         
         get(HttpPaths.REST_STATS_PERIOD.path, (request, response) -> {
             logger.info(
-                    JsonLog.technical(
+                    JsonLog.log(
                             String.format("GET/ %s complete",HttpPaths.REST_STATS_PERIOD.path),
-                            EventType.REST_GET,0)
+                            EventType.REST_GET,String.valueOf(0))
             );
 
         	Long start = Long.valueOf(request.params("from"));
@@ -77,9 +77,9 @@ public class Server {
 
         init();
 
-        logger.info(JsonLog.technical(
+        logger.info(JsonLog.log(
                 String.format("Server started on port : %d",port),
-                EventType.WEB_SERVER,0));
+                EventType.WEB_SERVER,String.valueOf(0)));
     }
 
 
