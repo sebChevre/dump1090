@@ -56,8 +56,8 @@ class ClientTcpSocketHandler {
      */
     public void listen()  {
         while (this.clientSocket.isConnected()) {
-            //String msg = SBS1MessagesSamples.getRandomMsg();
-            String msg = SBS1MessagesSamples.getRandomErroneusMsg();
+            String msg = SBS1MessagesSamples.getRandomMsg();
+            //String msg = SBS1MessagesSamples.getRandomErroneusMsg();
 
             //logger.fine("Message try..");
             out.print(msg);
